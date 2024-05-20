@@ -1,0 +1,24 @@
+[server]
+port = 8503
+
+enableCORS = true
+
+address = "0.0.0.0"
+
+headless = false
+
+[theme]
+base = "dark"
+primaryColor = "#FF5500"
+backgroundColor = "#3f3b3b"
+secondaryBackgroundColor = "#FF5500"
+textColor = "#f2e1e1"
+font = "serif"
+
+[browser]
+serverAddress = "localhost"
+serverPort = 8503
+gatherUsageStats = true
+
+[logger]
+level = "info"
