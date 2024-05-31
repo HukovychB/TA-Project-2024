@@ -4,9 +4,9 @@ st.set_page_config(page_title="TA App",
                 page_icon=":chart_with_upwards_trend:",
                 layout="wide"
 )
-import sys
-sys.path.append("C:/Files/study/semestr6/TA project")
-from app.backend import main as m
+#import sys
+#sys.path.append("C:/Files/study/semestr6/TA project")
+#from app.backend import main as m
 
 #Colors
 #Background: #3f3b3b
@@ -22,7 +22,7 @@ st.write("")
 st.write("")
 
 ticker_input = st.text_input("Enter the ticker (e.g., AAPL, MSFT):")
-m.ticker_input = ticker_input
+#m.ticker_input = ticker_input
 
 
 
