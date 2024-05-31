@@ -26,8 +26,8 @@ To run this project locally, follow these steps:
 -
 
 ## License
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License. See the [LICENSE](LICENSE.htm) file for details.
 
 ## Contact
-For any question and concerns, please contact us at [72617770@fsv.cuni.cz] or [].
+For any question and concerns, please contact us at 72617770@fsv.cuni.cz or .
 
