@@ -7,9 +7,7 @@ textColor = "#f2e1e1"
 font = "serif"
 
 [browser]
-serverAddress = "localhost"
-serverPort = 8507
-gatherUsageStats = true
+gatherUsageStats = false
 
 [logger]
 level = "info"
