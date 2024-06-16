@@ -8,7 +8,7 @@ font = "serif"
 
 [browser]
 serverAddress = "localhost"
-serverPort = 8505
+serverPort = 8507
 gatherUsageStats = true
 
 [logger]

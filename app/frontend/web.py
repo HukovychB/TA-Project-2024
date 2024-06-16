@@ -4,6 +4,7 @@ st.set_page_config(page_title="TA App",
                 page_icon=":chart_with_upwards_trend:",
                 layout="wide"
 )
+
 #import sys
 #sys.path.append("C:/Files/study/semestr6/TA project")
 #from app.backend import main as m
