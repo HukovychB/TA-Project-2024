@@ -10,4 +10,4 @@ font = "serif"
 gatherUsageStats = false
 
 [logger]
-level = "info"
+level = "info" 
