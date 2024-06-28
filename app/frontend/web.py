@@ -76,7 +76,7 @@ st.markdown("<h1 style='text-align: center;'>TECHNICAL ANALYSIS TEST AREA</h1>",
 st.markdown("---")
 
 # Load the animation JSON file
-animation_path = os.path.join(current_dir, 'app', 'frontend', 'Animation.json')
+animation_path = os.path.join(current_dir, 'Animation.json')
 try:
     with open(animation_path) as source:
         animation = json.load(source)
