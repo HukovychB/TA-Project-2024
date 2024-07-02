@@ -3,7 +3,7 @@ import os
 from datetime import datetime
 from streamlit_lottie import st_lottie
 import json
-import plotly.graph_objs as go
+from streamlit_option_menu import option_menu
 
 import main
 
@@ -33,37 +33,35 @@ def data_table(header, keys):
 
 st.set_page_config(page_title="TA App",
                 page_icon=":chart_with_upwards_trend:",
-                layout="wide"
+                layout="wide",
+                initial_sidebar_state="collapsed" 
 )
 
 #Colors
 #Background: #3f3b3b
 #Text: #f2e1e1
 #Other elements: #FF5500
-#Font: Serif
+#Font: serif
 
-#Hide 'Deploy' and 'Span' buttons
-# st.markdown("""
-# <style>
-# .st-emotion-cache-w9v1j9.ef3psqc5
-# {
-#     visibility: hidden;            
-# }
-# .st-emotion-cache-czk5ss.e16jpq800
-# {
-#     visibility: hidden;            
-# }
-# </style>
-# """, unsafe_allow_html=True)
-
+#STYLES
+with open('app/style.css') as f:
+     st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
 
 #BEGINNING
+
+# if 'page' not in st.session_state:
+#     st.session_state.page = 'home'
 
 col1, col2, col3 = st.columns([1, 4, 1])
 #IES logo
 col1.image('app/ies.png', width=100)
+
+col3.page_link("pages/info_page.py", label = "About the project")
+
 #Header
-col2.markdown("<h1 style='text-align: center;'>TECHNICAL ANALYSIS TEST AREA</h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center;'>TECHNICAL ANALYSIS TEST AREA</h1>", unsafe_allow_html=True)
+# st.balloons()
+st.write("")
 st.write("")
 #Animation
 with open("app/Animation.json") as source:
@@ -77,13 +75,46 @@ with col1:
     st.write("")
     #USER FORM
     ticker_input = st.text_input("Enter the ticker (e.g. AAPL, MSFT):", max_chars=10,)
-    period = st.selectbox("Choose the time interval:", ["","1mo", "3mo", "6mo", "1y", "2y", "5y", "10y", "ytd", "max"])
+    period = st.selectbox("Choose time interval:", ["","1mo", "3mo", "6mo", "1y", "2y", "5y", "10y", "ytd", "max"])
     s_btn = st.button("SEARCH")
 with col2:
     st_lottie(animation, height = 400, width = 400)
-if s_btn:
-        ticker_data = main.fetch_data(ticker_input)
-        main.create_graph(ticker_data, period)
+if s_btn and ticker_input and period:
+        with st.spinner("SEARCHING"):
+            ticker_data = main.fetch_data(ticker_input)
+            main.create_graph(ticker_data, period)
+            selected = option_menu(
+                    menu_title=None,
+                    options = ["INFO", "TECHNICAL ANALYSIS"],
+                    orientation="horizontal",
+                    icons = ['info-circle','bar-chart-steps'],
+                    styles={
+                        "container": {
+                            "padding": "0!important",  
+                            "background-color": "#3f3b3b",  
+                        },
+                        "nav-link": {
+                            "font-size": "24px",  
+                            "text-align": "center", 
+                            "margin": "0px",  
+                            "color": "#f2e1e1",  
+                            "font-family": "serif", 
+                            "padding": "10px 20px", 
+                            "--hover-color": "#FF5500",
+                        },
+                        "nav-link-selected": {
+                            "background-color": "#FF5500",  
+                            "color": "white",  
+                        },
+                        "icon": {
+                            "color": "#f2e1e1", 
+                            "font-size": "20px"
+                        },
+                    }
+        )
+elif s_btn:
+     st.error("Please enter the ticker and choose time interval.", icon="❗")
+
 
 
 # #INFO

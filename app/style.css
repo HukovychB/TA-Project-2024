@@ -1,0 +1,47 @@
+/* Remove top margin */
+.main > div {
+    padding-top: 3rem;
+}
+
+/* Hide 'Deploy', 'Span', 'Deploy' and Sidebar buttons and everything else unnecessary*/
+.st-emotion-cache-w9v1j9.ef3psqc5
+{
+    visibility: hidden;            
+}
+.st-emotion-cache-czk5ss.e16jpq800
+{
+    visibility: hidden;            
+}
+.st-emotion-cache-1tqswft.eczjsme4
+{
+    visibility: hidden;            
+}      
+.stDeployButton
+{
+    visibility: hidden;            
+}
+.st-emotion-cache-ok4tyi.e1vs0wn31
+{
+    visibility: hidden;            
+} 
+
+
+/* Style of Page link button */
+.st-emotion-cache-t1mpcy.e11k5jya1 
+{
+    background-color: #FF5500;
+    color: #f2e1e1;
+    font-size: 32pt;
+    font-family: serif;
+    padding: 8px 20px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;  
+}
+.st-emotion-cache-d7a840 p
+{
+    color: #f2e1e1;
+    font-weight: bold;
+    font-size: 12.5pt;
+}
+

@@ -23,7 +23,7 @@ def create_graph(ticker_data, period):
                                 decreasing_line_color='orangered',   
                                 whiskerwidth=0.1))
     fig.update_layout(
-        title=f"Graph {ticker_data.info.get('longName')}",
+        title=f"Graph {ticker_data.info.get('longName').upper()}",
         xaxis_rangeslider_visible=False,
         title_font=dict(size=32, family='serif', color='linen'),
         height=600,
