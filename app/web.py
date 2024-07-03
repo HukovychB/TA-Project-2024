@@ -47,10 +47,9 @@ st.set_page_config(page_title="TA App",
 with open('app/style.css') as f:
      st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
 
+
 #BEGINNING
 
-# if 'page' not in st.session_state:
-#     st.session_state.page = 'home'
 
 col1, col2, col3 = st.columns([1, 4, 1])
 #IES logo
@@ -60,7 +59,6 @@ col3.page_link("pages/info_page.py", label = "About the project")
 
 #Header
 st.markdown("<h1 style='text-align: center;'>TECHNICAL ANALYSIS TEST AREA</h1>", unsafe_allow_html=True)
-# st.balloons()
 st.write("")
 st.write("")
 #Animation
@@ -77,43 +75,52 @@ with col1:
     ticker_input = st.text_input("Enter the ticker (e.g. AAPL, MSFT):", max_chars=10,)
     period = st.selectbox("Choose time interval:", ["","1mo", "3mo", "6mo", "1y", "2y", "5y", "10y", "ytd", "max"])
     s_btn = st.button("SEARCH")
+    if s_btn:
+        st.session_state.ticker_input = ticker_input
+        st.session_state.period = period
+        st.session_state.s_btn = True    
 with col2:
     st_lottie(animation, height = 400, width = 400)
-if s_btn and ticker_input and period:
-        with st.spinner("SEARCHING"):
-            ticker_data = main.fetch_data(ticker_input)
-            main.create_graph(ticker_data, period)
-            selected = option_menu(
-                    menu_title=None,
-                    options = ["INFO", "TECHNICAL ANALYSIS"],
-                    orientation="horizontal",
-                    icons = ['info-circle','bar-chart-steps'],
-                    styles={
-                        "container": {
-                            "padding": "0!important",  
-                            "background-color": "#3f3b3b",  
-                        },
-                        "nav-link": {
-                            "font-size": "24px",  
-                            "text-align": "center", 
-                            "margin": "0px",  
-                            "color": "#f2e1e1",  
-                            "font-family": "serif", 
-                            "padding": "10px 20px", 
-                            "--hover-color": "#FF5500",
-                        },
-                        "nav-link-selected": {
-                            "background-color": "#FF5500",  
-                            "color": "white",  
-                        },
-                        "icon": {
-                            "color": "#f2e1e1", 
-                            "font-size": "20px"
-                        },
-                    }
-        )
+if st.session_state.get('s_btn', False) and st.session_state.get('ticker_input') and st.session_state.get('period'):
+    with st.spinner("SEARCHING"):
+        ticker_data = main.fetch_data(ticker_input)
+        main.create_graph(ticker_data, period)
+    selected = option_menu(
+            menu_title=None,
+            options = ["INFO", "TECHNICAL ANALYSIS"],
+            orientation="horizontal",
+            icons = ['info-circle','bar-chart-steps'],
+            styles={
+                "container": {
+                    "padding": "0!important",  
+                    "background-color": "#3f3b3b",  
+                },
+                "nav-link": {
+                    "font-size": "24px",  
+                    "text-align": "center", 
+                    "margin": "0px",  
+                    "color": "#f2e1e1",  
+                    "font-family": "serif", 
+                    "padding": "10px 20px", 
+                    "--hover-color": "#FF5500",
+                },
+                "nav-link-selected": {
+                    "background-color": "#FF5500",  
+                    "color": "white",  
+                },
+                "icon": {
+                    "color": "#f2e1e1", 
+                    "font-size": "20px"
+                },
+            }   
+    )
+    if selected == "INFO":
+        st.write("INFO")
+    if selected == "TECHNICAL ANALYSIS":
+        st.write("ANALYSIS")
+
 elif s_btn:
-     st.error("Please enter the ticker and choose time interval.", icon="❗")
+    st.error("Please enter the ticker and choose time interval.", icon="❗")
 
 
 

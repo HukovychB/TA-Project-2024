@@ -4,7 +4,7 @@
 }
 
 /* Hide 'Deploy', 'Span', 'Deploy' and Sidebar buttons and everything else unnecessary*/
-.st-emotion-cache-w9v1j9.ef3psqc5
+/* .st-emotion-cache-w9v1j9.ef3psqc5
 {
     visibility: hidden;            
 }
@@ -23,7 +23,11 @@
 .st-emotion-cache-ok4tyi.e1vs0wn31
 {
     visibility: hidden;            
-} 
+}
+.stException
+{
+    visibility: hidden;            
+}  */
 
 
 /* Style of Page link button */
