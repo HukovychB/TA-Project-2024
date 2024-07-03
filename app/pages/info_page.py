@@ -1,6 +1,6 @@
 import streamlit as st
 
-with open('app/pages/style1.css') as f:
+with open('app/frontend/info_style.css') as f:
      st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
 
 # BEGINNING

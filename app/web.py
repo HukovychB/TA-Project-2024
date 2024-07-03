@@ -5,7 +5,7 @@ from streamlit_lottie import st_lottie
 import json
 from streamlit_option_menu import option_menu
 
-import main
+from libraries import main
 
 
 def data_table(header, keys):
@@ -44,7 +44,7 @@ st.set_page_config(page_title="TA App",
 #Font: serif
 
 #STYLES
-with open('app/style.css') as f:
+with open('app/frontend/main_style.css') as f:
      st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
 
 
@@ -53,7 +53,7 @@ with open('app/style.css') as f:
 
 col1, col2, col3 = st.columns([1, 4, 1])
 #IES logo
-col1.image('app/ies.png', width=100)
+col1.image('app/frontend/ies.png', width=100)
 
 col3.page_link("pages/info_page.py", label = "About the project")
 
@@ -62,7 +62,7 @@ st.markdown("<h1 style='text-align: center;'>TECHNICAL ANALYSIS TEST AREA</h1>",
 st.write("")
 st.write("")
 #Animation
-with open("app/Animation.json") as source:
+with open("app/frontend/Animation.json") as source:
         animation = json.load(source)
 
 col1, col2 = st.columns([2, 1])

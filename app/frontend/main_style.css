@@ -4,7 +4,7 @@
 }
 
 /* Hide 'Deploy', 'Span', 'Deploy' and Sidebar buttons and everything else unnecessary*/
-/* .st-emotion-cache-w9v1j9.ef3psqc5
+.st-emotion-cache-w9v1j9.ef3psqc5
 {
     visibility: hidden;            
 }
@@ -22,12 +22,20 @@
 }
 .st-emotion-cache-ok4tyi.e1vs0wn31
 {
-    visibility: hidden;            
+    display: none;        
 }
-.stException
+.stException     /*  Exception when ticker is not found */
 {
-    visibility: hidden;            
-}  */
+    display: none;          
+} 
+.st-emotion-cache-gi0tri.e1nzilvr1    /*  Element near the main heading */
+{
+    display: none;            
+}
+.st-emotion-cache-1c43kqr.ezrtsby2    /*  Menu at the top */
+{
+    display: none;            
+} 
 
 
 /* Style of Page link button */
