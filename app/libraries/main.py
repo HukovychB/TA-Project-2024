@@ -48,6 +48,21 @@ def create_graph(ticker_data, period):
 
     st.plotly_chart(fig, config=dict(scrollZoom=True))
 
+def format_value(value):
+    suffixes = ["", "K", "M", "B", "T"]
+    suffix_index = 0
+    while value >= 1000 and suffix_index < len(suffixes) - 1:
+        value /= 1000
+        suffix_index += 1
+    return f"${value:.1f}{suffixes[suffix_index]}"
+
+def html_table(data):
+    html = "<table class='custom-table'>"
+    for key, value in data:
+        html += f"<tr><td>{key}</td><td>{value}</td></tr>"
+    html += "</table>"
+    return html
+
 if __name__ == '__main__':
     stock = yf.Ticker("AAPL")
     stock.history(period = 'max')

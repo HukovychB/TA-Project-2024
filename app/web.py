@@ -4,6 +4,7 @@ from datetime import datetime
 from streamlit_lottie import st_lottie
 import json
 from streamlit_option_menu import option_menu
+import pandas as pd
 
 from libraries import main
 
@@ -44,7 +45,7 @@ st.set_page_config(page_title="TA App",
 #Font: serif
 
 #STYLES
-with open('app/frontend/main_style.css') as f:
+with open('frontend/main_style.css') as f:
      st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
 
 
@@ -53,7 +54,7 @@ with open('app/frontend/main_style.css') as f:
 
 col1, col2, col3 = st.columns([1, 4, 1])
 #IES logo
-col1.image('app/frontend/ies.png', width=100)
+col1.image('frontend/ies.png', width=100)
 
 col3.page_link("pages/info_page.py", label = "About the project")
 
@@ -62,7 +63,7 @@ st.markdown("<h1 style='text-align: center;'>TECHNICAL ANALYSIS TEST AREA</h1>",
 st.write("")
 st.write("")
 #Animation
-with open("app/frontend/Animation.json") as source:
+with open("frontend/Animation.json") as source:
         animation = json.load(source)
 
 col1, col2 = st.columns([2, 1])
@@ -115,7 +116,98 @@ if st.session_state.get('s_btn', False) and st.session_state.get('ticker_input')
             }   
     )
     if selected == "INFO":
-        st.write("INFO")
+        st.markdown("""
+        <style>
+            .custom-table {
+                border-spacing: 0;
+                border-collapse: collapse;
+                width: 100%;
+            }
+            .custom-table th, .custom-table td {
+                border: 1px solid #ddd;
+                padding: 8px;
+                color: #333;
+            }
+            .custom-table th {
+                padding-top: 12px;
+                padding-bottom: 12px;
+                text-align: left;
+                background-color: #4CAF50;
+                color: white;
+            }
+            .custom-table tr:nth-child(even) {
+                background-color: #f2f2f2;
+            }
+            .custom-table tr:hover {
+                background-color: #ddd;
+            }
+        </style>
+        """, unsafe_allow_html=True)
+
+        col1, col2, col3 = st.columns(3)
+
+        #STOCK INFO
+        country = ticker_data.info.get('country', 'N/A')
+        sector = ticker_data.info.get('sector', 'N/A')
+        industry = ticker_data.info.get('industry', 'N/A')
+        market_cap = ticker_data.info.get('marketCap', 'N/A')
+        ent_value = ticker_data.info.get('enterpriseValue', 'N/A')
+        employees = ticker_data.info.get('fullTimeEmployees', 'N/A')
+
+        stock_info = [
+            ("Stock Info", "Value"),
+            ("Country", country),
+            ("Sector", sector),
+            ("Industry", industry),
+            ("Market Cap", main.format_value(market_cap)),
+            ("Enterprise Value", main.format_value(ent_value)),
+            ("Employees", employees)
+        ]
+                
+        with col1:
+            st.markdown(main.html_table(stock_info), unsafe_allow_html=True)
+                
+        #PRICE INFO
+        current_price = ticker_data.info.get('currentPrice', 'N/A')
+        prev_close = ticker_data.info.get('previousClose', 'N/A')
+        day_high = ticker_data.info.get('dayHigh', 'N/A')
+        day_low = ticker_data.info.get('dayLow', 'N/A')
+        ft_week_high = ticker_data.info.get('fiftyTwoWeekHigh', 'N/A')
+        ft_week_low = ticker_data.info.get('fiftyTwoWeekLow', 'N/A')
+                
+        price_info = [
+            ("Price Info", "Value"),
+            ("Current Price", f"${current_price:.2f}"),
+            ("Previous Close", f"${prev_close:.2f}"),
+            ("Day High", f"${day_high:.2f}"),
+            ("Day Low", f"${day_low:.2f}"),
+            ("52 Week High", f"${ft_week_high:.2f}"),
+            ("52 Week Low", f"${ft_week_low:.2f}")
+        ]
+                
+        with col2:
+            st.markdown(main.html_table(price_info), unsafe_allow_html=True)
+
+        #BUSINESS METRICS
+        forward_eps = ticker_data.info.get('forwardEps', 'N/A')
+        forward_pe = ticker_data.info.get('forwardPE', 'N/A')
+        peg_ratio = ticker_data.info.get('pegRatio', 'N/A')
+        dividend_rate = ticker_data.info.get('dividendRate', 'N/A')
+        dividend_yield = ticker_data.info.get('dividendYield', 'N/A')
+        recommendation = ticker_data.info.get('recommendationKey', 'N/A')
+                
+        biz_metrics = [
+            ("Business Metrics", "Value"),
+            ("EPS (FWD)", f"{forward_eps:.2f}"),
+            ("P/E (FWD)", f"{forward_pe:.2f}"),
+            ("PEG Ratio", f"{peg_ratio:.2f}"),
+            ("Div Rate (FWD)", f"${dividend_rate:.2f}"),
+            ("Div Yield (FWD)", f"{dividend_yield * 100:.2f}%"),
+            ("Recommendation", recommendation.capitalize())
+        ]
+                
+        with col3:
+            st.markdown(main.html_table(biz_metrics), unsafe_allow_html=True)
     if selected == "TECHNICAL ANALYSIS":
         st.write("ANALYSIS")
 
