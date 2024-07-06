@@ -58,3 +58,7 @@
     font-size: 12.5pt;
 }
 
+/* Make graphs closer to each other */
+.stPlotlyChart.js-plotly-plot {
+    margin-top: -75px;
+}
