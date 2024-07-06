@@ -7,6 +7,7 @@ from streamlit_option_menu import option_menu
 import pandas as pd
 
 from libraries import main
+from libraries import constants as c
 
 
 def data_table(header, keys):
@@ -45,7 +46,7 @@ st.set_page_config(page_title="TA App",
 #Font: serif
 
 #STYLES
-with open('frontend/main_style.css') as f:
+with open('app/frontend/main_style.css') as f:
      st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
 
 
@@ -54,7 +55,7 @@ with open('frontend/main_style.css') as f:
 
 col1, col2, col3 = st.columns([1, 4, 1])
 #IES logo
-col1.image('frontend/ies.png', width=100)
+col1.image('app/frontend/ies.png', width=100)
 
 col3.page_link("pages/info_page.py", label = "About the project")
 
@@ -63,8 +64,8 @@ st.markdown("<h1 style='text-align: center;'>TECHNICAL ANALYSIS TEST AREA</h1>",
 st.write("")
 st.write("")
 #Animation
-with open("frontend/Animation.json") as source:
-        animation = json.load(source)
+with open("app/frontend/Animation.json") as source:
+        animation_front = json.load(source)
 
 col1, col2 = st.columns([2, 1])
 with col1:
@@ -72,50 +73,35 @@ with col1:
     st.write("")
     st.write("")
     st.write("")
+
     #USER FORM
     ticker_input = st.text_input("Enter the ticker (e.g. AAPL, MSFT):", max_chars=10,)
-    period = st.selectbox("Choose time interval:", ["","1mo", "3mo", "6mo", "1y", "2y", "5y", "10y", "ytd", "max"])
-    s_btn = st.button("SEARCH")
-    if s_btn:
+    period_input = st.selectbox("Choose time interval:", ["","1mo", "3mo", "6mo", "1y", "2y", "5y", "10y", "ytd", "max"])
+    search_btn = st.button("SEARCH")
+    if search_btn and not st.session_state.search_btn:
         st.session_state.ticker_input = ticker_input
-        st.session_state.period = period
-        st.session_state.s_btn = True    
+        st.session_state.period_input = period_input
+        st.session_state.search_btn = True    
 with col2:
-    st_lottie(animation, height = 400, width = 400)
-if st.session_state.get('s_btn', False) and st.session_state.get('ticker_input') and st.session_state.get('period'):
+    st_lottie(animation_front, height = 400, width = 400)
+
+if st.session_state.get('search_btn', False) and st.session_state.get('ticker_input') and st.session_state.get('period_input'):
     with st.spinner("SEARCHING"):
         ticker_data = main.fetch_data(ticker_input)
-        main.create_graph(ticker_data, period)
-    selected = option_menu(
+        if 'graph' not in st.session_state or st.session_state.ticker_input != ticker_input or st.session_state.period_input != period_input:
+            st.session_state.graph = main.create_graph(ticker_data, period_input)
+        graph_place = st.empty()
+        graph_place.plotly_chart(st.session_state.graph, config=dict(scrollZoom=True))
+    selected_page = option_menu(
             menu_title=None,
             options = ["INFO", "TECHNICAL ANALYSIS"],
             orientation="horizontal",
             icons = ['info-circle','bar-chart-steps'],
-            styles={
-                "container": {
-                    "padding": "0!important",  
-                    "background-color": "#3f3b3b",  
-                },
-                "nav-link": {
-                    "font-size": "24px",  
-                    "text-align": "center", 
-                    "margin": "0px",  
-                    "color": "#f2e1e1",  
-                    "font-family": "serif", 
-                    "padding": "10px 20px", 
-                    "--hover-color": "#FF5500",
-                },
-                "nav-link-selected": {
-                    "background-color": "#FF5500",  
-                    "color": "white",  
-                },
-                "icon": {
-                    "color": "#f2e1e1", 
-                    "font-size": "20px"
-                },
-            }   
+            styles = c.styles_option_menu
     )
-    if selected == "INFO":
+
+
+    if selected_page == "INFO":
         st.markdown("""
         <style>
             .custom-table {
@@ -163,10 +149,10 @@ if st.session_state.get('s_btn', False) and st.session_state.get('ticker_input')
             ("Enterprise Value", main.format_value(ent_value)),
             ("Employees", employees)
         ]
-                
+
         with col1:
             st.markdown(main.html_table(stock_info), unsafe_allow_html=True)
-                
+
         #PRICE INFO
         current_price = ticker_data.info.get('currentPrice', 'N/A')
         prev_close = ticker_data.info.get('previousClose', 'N/A')
@@ -174,7 +160,7 @@ if st.session_state.get('s_btn', False) and st.session_state.get('ticker_input')
         day_low = ticker_data.info.get('dayLow', 'N/A')
         ft_week_high = ticker_data.info.get('fiftyTwoWeekHigh', 'N/A')
         ft_week_low = ticker_data.info.get('fiftyTwoWeekLow', 'N/A')
-                
+
         price_info = [
             ("Price Info", "Value"),
             ("Current Price", f"${current_price:.2f}"),
@@ -184,7 +170,7 @@ if st.session_state.get('s_btn', False) and st.session_state.get('ticker_input')
             ("52 Week High", f"${ft_week_high:.2f}"),
             ("52 Week Low", f"${ft_week_low:.2f}")
         ]
-                
+
         with col2:
             st.markdown(main.html_table(price_info), unsafe_allow_html=True)
 
@@ -195,7 +181,7 @@ if st.session_state.get('s_btn', False) and st.session_state.get('ticker_input')
         dividend_rate = ticker_data.info.get('dividendRate', 'N/A')
         dividend_yield = ticker_data.info.get('dividendYield', 'N/A')
         recommendation = ticker_data.info.get('recommendationKey', 'N/A')
-                
+
         biz_metrics = [
             ("Business Metrics", "Value"),
             ("EPS (FWD)", f"{forward_eps:.2f}"),
@@ -205,13 +191,44 @@ if st.session_state.get('s_btn', False) and st.session_state.get('ticker_input')
             ("Div Yield (FWD)", f"{dividend_yield * 100:.2f}%"),
             ("Recommendation", recommendation.capitalize())
         ]
-                
+
         with col3:
             st.markdown(main.html_table(biz_metrics), unsafe_allow_html=True)
-    if selected == "TECHNICAL ANALYSIS":
-        st.write("ANALYSIS")
 
-elif s_btn:
+
+
+    if selected_page == "TECHNICAL ANALYSIS":
+        selected_indicators = st.multiselect("Select technical indicators", [
+                    'Simple Moving Average','Trading Range Breakout',
+                    'Relative Strength Index (RSI)','Moving Average Converge Divergence (MACD)',
+                    'Directional Movement Index (DMI)'])
+        
+        if "Simple Moving Average" in selected_indicators:
+            st.write("Select parameters for the Moving Averages")
+            ma_short = st.number_input("Select length of the short moving average in days:", min_value=1, max_value=len(ticker_data.history(period = period_input))-1, value = 20)
+            ma_long = st.number_input("Select length of the long moving average in days:", min_value=2, max_value=len(ticker_data.history(period = period_input)), value = 50)
+        if "Trading Range Breakout" in selected_indicators:
+            st.write("Select parameters for Trading Range Breakout")
+            trb_length = st.number_input("Select length of indicator in days:", min_value=1, max_value=249, value = 20)
+            trb_width = st.number_input("Select a parameter for the difference between a support and resistance:", min_value=2, max_value=250, value = 50)               
+        if "Relative Strength Index (RSI)" in selected_indicators:
+            st.write("Select parameters for RSI")
+        if "Moving Average Converge Divergence (MACD)" in selected_indicators:
+            st.write("Select parameters for MACD")
+        if "Directional Movement Index (DMI)" in selected_indicators:
+            st.write("Select parameters for DMI")
+
+        if selected_indicators != []:
+            parameter_btn = st.button("ANALYZE")
+
+        if parameter_btn:
+            if ma_short >= ma_long:
+                st.error("The parameter for the short MA should be smaller than the parameter for the long MA. Please insert valid values.", icon="❗")
+            else:
+                st.session_state.graph = main.add_mas(st.session_state.graph, ticker_data, period_input, ma_short, ma_long)
+                graph_place.plotly_chart(st.session_state.graph, config=dict(scrollZoom=True))
+            
+elif search_btn:
     st.error("Please enter the ticker and choose time interval.", icon="❗")
 
 
