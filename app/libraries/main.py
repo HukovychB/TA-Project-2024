@@ -1,5 +1,5 @@
-import yfinance as yf
 import streamlit as st
+import yfinance as yf
 import plotly.graph_objs as go
 import numpy as np
 import pandas_ta as ta
@@ -12,6 +12,48 @@ def fetch_data(ticker_input):
         return ticker_data
     else:
         st.error("Error: The ticker is not recognized. Please provide a valid symbol listed on Yahoo Finance (https://finance.yahoo.com/).", icon="🚨")
+
+
+#TA SECTION
+
+#SUPPORT
+def rangebreaks(interval):
+    if 'm' in interval or 'h' in interval:
+        rangebreaks = [
+            dict(bounds=["sat", "mon"]),  
+            dict(bounds=[16, 9.5], pattern="hour"), 
+        ]
+    else:
+        rangebreaks = [
+            dict(bounds=["sat", "mon"]), 
+        ]
+    return rangebreaks
+
+def indicator_graph_layout(fig, interval, height = 400):
+    fig.update_layout(
+        height = height,
+        dragmode='pan',
+        uirevision='constant',
+        xaxis=dict(
+            showline=False,
+            linecolor='dimgrey',            
+            gridcolor='black',
+            rangebreaks=rangebreaks(interval),
+            tickfont=dict(family='serif', size=12, color='linen')                
+        ),
+        yaxis=dict(
+            showline=False,
+            linecolor='dimgrey',            
+            gridcolor='dimgrey',
+            tickfont=dict(family='serif', size=12, color='linen')           
+        ),
+        legend=dict(
+            x=0,          
+            y=1.2,          
+            xanchor='left',
+            yanchor='top'
+        )     
+    )
 
 def create_graph(ticker_data, period, interval):
     price_df = ticker_data.history(period = period, interval = interval)
@@ -31,16 +73,6 @@ def create_graph(ticker_data, period, interval):
                                 decreasing_line_width=0.75,     
                                 whiskerwidth=0.1))
     
-    if 'm' in interval or 'h' in interval:
-        rangebreaks = [
-            dict(bounds=["sat", "mon"]),  
-            dict(bounds=[16, 9.5], pattern="hour"), 
-        ]
-    else:
-        rangebreaks = [
-            dict(bounds=["sat", "mon"]), 
-        ]
-    
     fig.update_layout(
         title=f"Graph {ticker_data.info.get('longName')} ({ticker_data.ticker.upper()})",
         xaxis_rangeslider_visible=False,
@@ -52,7 +84,7 @@ def create_graph(ticker_data, period, interval):
             showline=False,
             linecolor='dimgrey',            
             gridcolor='black',
-            rangebreaks= rangebreaks,
+            rangebreaks= rangebreaks(interval),
             tickfont=dict(family='serif', size=12, color='linen')                
         ),
         yaxis=dict(
@@ -73,6 +105,7 @@ def create_graph(ticker_data, period, interval):
 
     return fig
 
+#INDICATOR GRAPHS
 def add_mas(fig, ticker_data, period, interval, ma_period_short, ma_period_long, ema_chechbox):
     price_df = ticker_data.history(period=period, interval=interval)
 
@@ -168,40 +201,7 @@ def create_rsi(ticker_data, period, interval, rsi_length, rsi_thresholds, rsi_ch
         name=f'Upper Threshold ({upper_threshold})'
     )
 
-    if 'm' in interval or 'h' in interval:
-        rangebreaks = [
-            dict(bounds=["sat", "mon"]),  
-            dict(bounds=[16, 9.5], pattern="hour"), 
-        ]
-    else:
-        rangebreaks = [
-            dict(bounds=["sat", "mon"]), 
-        ]
-
-    fig.update_layout(
-        height = 300,
-        dragmode='pan',
-        uirevision='constant',
-        xaxis=dict(
-            showline=False,
-            linecolor='dimgrey',            
-            gridcolor='black',
-            rangebreaks=rangebreaks,
-            tickfont=dict(family='serif', size=12, color='linen')                
-        ),
-        yaxis=dict(
-            showline=False,
-            linecolor='dimgrey',            
-            gridcolor='dimgrey',
-            tickfont=dict(family='serif', size=12, color='linen')           
-        ),
-        legend=dict(
-            x=0,          
-            y=1.2,          
-            xanchor='left',
-            yanchor='top'
-        )     
-    )
+    indicator_graph_layout(fig, interval, height = 300)
 
     if rsi_checkbox:
         price_df.ta.sma(close = f"RSI_{rsi_length}", length = rsi_length, append=True)
@@ -245,40 +245,7 @@ def create_macd(ticker_data, period, interval, macd_fast, macd_slow, macd_signal
         name='MACD_Histogram'
     ))
 
-    if 'm' in interval or 'h' in interval:
-        rangebreaks = [
-            dict(bounds=["sat", "mon"]),  
-            dict(bounds=[16, 9.5], pattern="hour"), 
-        ]
-    else:
-        rangebreaks = [
-            dict(bounds=["sat", "mon"]), 
-        ]
-
-    fig.update_layout(
-        height = 400,
-        dragmode='pan',
-        uirevision='constant',
-        xaxis=dict(
-            showline=False,
-            linecolor='dimgrey',            
-            gridcolor='black',
-            rangebreaks=rangebreaks,
-            tickfont=dict(family='serif', size=12, color='linen')                
-        ),
-        yaxis=dict(
-            showline=False,
-            linecolor='dimgrey',            
-            gridcolor='dimgrey',
-            tickfont=dict(family='serif', size=12, color='linen')           
-        ),
-        legend=dict(
-            x=0,          
-            y=1.2,          
-            xanchor='left',
-            yanchor='top'
-        )     
-    )
+    indicator_graph_layout(fig, interval)
 
     return fig 
 
@@ -312,47 +279,81 @@ def create_dmi(ticker_data, period, interval, length, adx_smoothing):
     name='DM-'
     ))
 
-    if 'm' in interval or 'h' in interval:
-        rangebreaks = [
-            dict(bounds=["sat", "mon"]),  
-            dict(bounds=[16, 9.5], pattern="hour"), 
-        ]
-    else:
-        rangebreaks = [
-            dict(bounds=["sat", "mon"]), 
-        ]
-
-    fig.update_layout(
-        height = 400,
-        dragmode='pan',
-        uirevision='constant',
-        xaxis=dict(
-            showline=False,
-            linecolor='dimgrey',            
-            gridcolor='black',
-            rangebreaks=rangebreaks,
-            tickfont=dict(family='serif', size=12, color='linen')                
-        ),
-        yaxis=dict(
-            showline=False,
-            linecolor='dimgrey',            
-            gridcolor='dimgrey',
-            tickfont=dict(family='serif', size=12, color='linen')           
-        ),
-        legend=dict(
-            x=0,          
-            y=1.2,          
-            xanchor='left',
-            yanchor='top'
-        )     
-    )
+    indicator_graph_layout(fig, interval)
 
     return fig 
+
+#EXECUTE TA GRAPHS
+def execute_ma(ticker_data, period_input, interval_input, graph,
+               ma_short, ma_long, ema_checkbox,
+               graph_place):
+    if ma_short >= ma_long:
+        st.error("The parameter for the short MA should be smaller than the parameter for the long MA. Please insert valid values.", icon="❗")
+    else:
+        st.session_state.graph = add_mas(graph, ticker_data, period_input, interval_input, ma_short, ma_long, ema_checkbox)
+        graph_place.plotly_chart(st.session_state.graph, config=dict(scrollZoom=True))
+
+def execute_trb(ticker_data, period_input, interval_input, graph,
+               trb_length, trb_width,
+               graph_place):
+    st.session_state.graph = add_channels(graph, ticker_data, period_input, interval_input, trb_length, trb_width)
+    graph_place.plotly_chart(st.session_state.graph, config=dict(scrollZoom=True))
+
+def execute_rsi(ticker_data, period_input, interval_input,
+               rsi_length, rsi_thresholds, rsi_checkbox,
+               RSI_place):
+    rsi_graph = create_rsi(ticker_data, period_input, interval_input, rsi_length, rsi_thresholds, rsi_checkbox)
+    RSI_place.plotly_chart(rsi_graph, config=dict(scrollZoom=True))
+
+def execute_macd(ticker_data, period_input, interval_input,
+               macd_fast, macd_slow, macd_signal,
+               MACD_place):
+    if macd_fast >= macd_slow:
+        st.error("The parameter for the fast MA should be smaller than the parameter for the slow MA. Please insert valid values.", icon="❗")  
+    else:
+        macd_graph = create_macd(ticker_data, period_input, interval_input, macd_fast, macd_slow, macd_signal)
+        MACD_place.plotly_chart(macd_graph, config=dict(scrollZoom=True))
+
+def execute_dmi(ticker_data, period_input, interval_input,
+               dmi_length, adx_smoothing,
+               DMI_place):
+        dmi_graph = create_dmi(ticker_data, period_input, interval_input, dmi_length, adx_smoothing)
+        DMI_place.plotly_chart(dmi_graph, config=dict(scrollZoom=True))
+
+def execute_ta(selected_indicators, ticker_data, period_input, interval_input, graph,
+               ma_short, ma_long, ema_checkbox, trb_length, trb_width, rsi_length, rsi_thresholds, 
+               rsi_checkbox, macd_fast, macd_slow, macd_signal, dmi_length, adx_smoothing, 
+               graph_place, RSI_place, MACD_place, DMI_place):
+    if "Moving Average" in selected_indicators:
+        execute_ma(ticker_data, period_input, interval_input, graph,
+                   ma_short, ma_long, ema_checkbox,
+                   graph_place)
+
+    if "Trading Range Breakout" in selected_indicators:
+        execute_trb(ticker_data, period_input, interval_input, graph,
+                    trb_length, trb_width,
+                    graph_place)
+
+    if "Relative Strength Index (RSI)" in selected_indicators:  
+        execute_rsi(ticker_data, period_input, interval_input,
+                    rsi_length, rsi_thresholds, rsi_checkbox,
+                    RSI_place)
+
+    if "Moving Average Converge Divergence (MACD)" in selected_indicators:
+        execute_macd(ticker_data, period_input, interval_input,
+                    macd_fast, macd_slow, macd_signal,
+                    MACD_place)
+
+    if "Directional Movement Index (DMI)" in selected_indicators:  
+        execute_dmi(ticker_data, period_input, interval_input,
+                    dmi_length, adx_smoothing,
+                    DMI_place)
 
 
 def do_analysis():
     pass
 
+#INFO SECTION
 
 def format_value(value):
     suffixes = ["", "K", "M", "B", "T"]
@@ -369,9 +370,6 @@ def html_table(data):
     html += "</table>"
     return html
 
-# if __name__ == '__main__':
-#     stock = yf.Ticker("AAPL")
-#     stock.history(period = 'max')
 
 
 
