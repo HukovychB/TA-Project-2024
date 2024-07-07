@@ -4,11 +4,13 @@ import plotly.graph_objs as go
 import numpy as np
 import pandas_ta as ta
 
-def fetch_data(ticker_input):
+def fetch_data(ticker_input, period, interval):
     ticker_data = yf.Ticker(ticker_input)
     price = ticker_data.history(period = 'max')
 
-    if not price.empty:
+    if interval == '5m' and period != '1mo':
+        st.error("5 minutes time frame can be used only for the time period of 1 month. Please select the correct time period.", icon="🚨")
+    elif not price.empty:
         return ticker_data
     else:
         st.error("Error: The ticker is not recognized. Please provide a valid symbol listed on Yahoo Finance (https://finance.yahoo.com/).", icon="🚨")

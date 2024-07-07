@@ -84,7 +84,7 @@ with col2:
 
 if st.session_state.get('search_btn', False) and st.session_state.get('ticker_input') and st.session_state.get('period_input') and st.session_state.get('interval_input'):
     with st.spinner("SEARCHING"):
-        ticker_data = main.fetch_data(ticker_input)
+        ticker_data = main.fetch_data(ticker_input, period_input,interval_input)
         # if 'graph' not in st.session_state or st.session_state.ticker_input != ticker_input or st.session_state.period_input != period_input:
         if search_btn:
             st.session_state.graph = main.create_graph(ticker_data, period_input, interval_input)
