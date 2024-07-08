@@ -366,10 +366,20 @@ def format_value(value):
     return f"${value:.1f}{suffixes[suffix_index]}"
 
 def html_table(data):
-    html = "<table class='custom-table'>"
-    for key, value in data:
-        html += f"<tr><td>{key}</td><td>{value}</td></tr>"
-    html += "</table>"
+    html = "<div id='custom-table' class='custom-table'>"
+    
+    html += "<div id='table-top' class='table-top'>"
+    html += f"<div class='table-top-cell' style='width:129px; text-align:center;'>{data[0][0]}</div>"
+    html += f"<div class='table-top-cell' style='border:none;'>{data[0][1]}</div>"
+    html += "</div>"
+    
+    html += "<div id='table-middle' class='table-middle'>"
+    for key, value in data[1:]:
+        html += f"<div class='table-row'><div class='table-left'>{key}</div>"
+        html += f"<div class='table-right'>{value}</div></div>"
+    html += "</div>"
+    
+    html += "</div>"
     return html
 
 

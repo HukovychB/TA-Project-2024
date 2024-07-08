@@ -4,7 +4,6 @@ from datetime import datetime
 from streamlit_lottie import st_lottie
 import json
 from streamlit_option_menu import option_menu
-import pandas as pd
 
 from libraries import main, constants as c
 
@@ -106,27 +105,92 @@ if st.session_state.get('search_btn', False) and st.session_state.get('ticker_in
         st.markdown("""
         <style>
             .custom-table {
-                border-spacing: 0;
-                border-collapse: collapse;
+                margin: 0;
+                padding: 4px;
+                width: calc(129px + 50%);
+                font: 11px Arial, Helvetica, sans-serif;
+                color: #747474;
+                background-color: #0c2a62;
+                box-sizing: border-box;
+                border: 1px solid #ced9ec;
+                border-radius: 4px;
+            }
+
+            .table-top {
+                margin: 0;
+                padding: 0;
                 width: 100%;
+                height: 46px;
+                border-top: 2px solid #FFF;
+                background: #eff4ff url(frontend/top-light-blue.png) repeat-x left top;
+                border-bottom: 1px solid #ced9ec;
+                display: flex;
+                align-items: center; 
             }
-            .custom-table th, .custom-table td {
-                border: 1px solid #ddd;
-                padding: 8px;
-                color: #333;
+
+            .table-top-cell {
+                flex: 1; 
+                padding: 15px 0;
+                text-align: center;
+                height: 31px;
+                border-right: 1px solid #ced9ec;
+                color: #1f3d71;
+                font: 13px Arial, Helvetica, sans-serif;
+                display: flex;
+                align-items: center; 
+                justify-content: center; 
             }
-            .custom-table th {
-                padding-top: 12px;
-                padding-bottom: 12px;
-                text-align: left;
-                background-color: #4CAF50;
-                color: white;
+
+            .table-top-cell:first-child {
+                border-left: 1px solid #ced9ec;
             }
-            .custom-table tr:nth-child(even) {
-                background-color: #f2f2f2;
+
+            .table-middle {
+                margin: 0;
+                padding: 0;
+                width: 100%;
+                background: #f6f6f6 url(frontend/center-bcg.png) repeat-y right top;
+                overflow: hidden;
+                border: 1px solid #ced9ec;
+                border-top: none;
+                border-left: none;
+                border-right: none;
             }
-            .custom-table tr:hover {
-                background-color: #ddd;
+
+            .table-row {
+                clear: both;
+                width: 100%;
+                display: flex;
+                flex-direction: row;
+                box-sizing: border-box;
+            }
+
+            .table-left {
+                flex: 0 0 129px;
+                margin: 0;
+                padding: 10px 0;
+                text-align: center;
+                height: 25px;
+                border-right: 1px solid #ced9ec;
+                border-bottom: 1px solid #b3c1db;
+                color: #1f3d71;
+                font: 13px Arial, Helvetica, sans-serif;
+                display: flex;
+                align-items: center; 
+                justify-content: center; 
+            }
+
+            .table-right {
+                flex: 1;
+                margin: 0;
+                padding: 11px 0;
+                text-align: center;
+                height: 24px;
+                border-right: 1px solid #ced9ec;
+                border-bottom: 1px solid #b3c1db;
+                display: flex;
+                align-items: center; 
+                justify-content: center; 
             }
         </style>
         """, unsafe_allow_html=True)
@@ -142,7 +206,7 @@ if st.session_state.get('search_btn', False) and st.session_state.get('ticker_in
         employees = ticker_data.info.get('fullTimeEmployees', 'N/A')
 
         stock_info = [
-            ("Stock Info", "Value"),
+            ("Stock Info", f"{ticker_input}"),
             ("Country", country),
             ("Sector", sector),
             ("Industry", industry),
@@ -163,7 +227,7 @@ if st.session_state.get('search_btn', False) and st.session_state.get('ticker_in
         ft_week_low = ticker_data.info.get('fiftyTwoWeekLow', 'N/A')
 
         price_info = [
-            ("Price Info", "Value"),
+            ("Price Info", f"{ticker_input}"),
             ("Current Price", f"${current_price:.2f}"),
             ("Previous Close", f"${prev_close:.2f}"),
             ("Day High", f"${day_high:.2f}"),
@@ -184,7 +248,7 @@ if st.session_state.get('search_btn', False) and st.session_state.get('ticker_in
         recommendation = ticker_data.info.get('recommendationKey', 'N/A')
 
         biz_metrics = [
-            ("Business Metrics", "Value"),
+            ("Business Metrics", f"{ticker_input}"),
             ("EPS (FWD)", f"{forward_eps:.2f}"),
             ("P/E (FWD)", f"{forward_pe:.2f}"),
             ("PEG Ratio", f"{peg_ratio:.2f}"),
