@@ -20,4 +20,12 @@ styles_option_menu = {
         "color": "#f2e1e1", 
         "font-size": "20px"
     },
-}  
+} 
+
+styles_statistics_df = {
+    'Total Return': lambda x: f'{x*100:.2f}%', 'Ann. Mean Return': lambda x: f'{x*100:.2f}%', 
+    'St. Dev.': lambda x: f'{x*100:.2f}%', 'Max Drawdown': lambda x: f'{x*100:.2f}%',
+    'Pct. Win. Trades': lambda x: f'{x*100:.2f}%', 'Pct. Losing Trades': lambda x: f'{x*100:.2f}%',
+    'Num. Trades': '{:.0f}', 'Win. Trades': '{:.0f}', 'Losing Trades': '{:.0f}', 'Avg. Trade Duration': '{:.1f}',
+    'Sharpe': '{:.2f}', 'Sortino': '{:.2f}', 'Win/Loss Ratio': '{:.2f}'
+}

@@ -5,6 +5,11 @@ import numpy as np
 import pandas as pd
 import pandas_ta as ta
 
+from libraries import indicators as ind, constants as c
+
+#-------------------------------------------------------
+#MAIN (INITIAL INTERACTION)
+#-------------------------------------------------------
 def fetch_data(ticker_input, period, interval):
     ticker_data = yf.Ticker(ticker_input)
     price = ticker_data.history(period = 'max')
@@ -15,48 +20,6 @@ def fetch_data(ticker_input, period, interval):
         return ticker_data
     else:
         st.error("Error: The ticker is not recognized. Please provide a valid symbol listed on Yahoo Finance (https://finance.yahoo.com/).", icon="🚨")
-
-
-#TA SECTION
-
-#SUPPORT
-def rangebreaks(interval):
-    if 'm' in interval or 'h' in interval:
-        rangebreaks = [
-            dict(bounds=["sat", "mon"]),  
-            dict(bounds=[16, 9.5], pattern="hour"), 
-        ]
-    else:
-        rangebreaks = [
-            dict(bounds=["sat", "mon"]), 
-        ]
-    return rangebreaks
-
-def indicator_graph_layout(fig, interval, height = 400):
-    fig.update_layout(
-        height = height,
-        dragmode='pan',
-        uirevision='constant',
-        xaxis=dict(
-            showline=False,
-            linecolor='dimgrey',            
-            gridcolor='black',
-            rangebreaks=rangebreaks(interval),
-            tickfont=dict(family='serif', size=12, color='linen')                
-        ),
-        yaxis=dict(
-            showline=False,
-            linecolor='dimgrey',            
-            gridcolor='dimgrey',
-            tickfont=dict(family='serif', size=12, color='linen')           
-        ),
-        legend=dict(
-            x=0,          
-            y=1.2,          
-            xanchor='left',
-            yanchor='top'
-        )     
-    )
 
 def create_graph(ticker_data, period, interval):
     price_df = ticker_data.history(period = period, interval = interval)
@@ -108,325 +71,43 @@ def create_graph(ticker_data, period, interval):
 
     return fig
 
-#INDICATOR GRAPHS
-def add_mas(fig, ticker_data, period, interval, ma_period_short, ma_period_long, ema_chechbox):
-    price_df = ticker_data.history(period=period, interval=interval)
-
-    if ema_chechbox:
-        price_df['Moving_Average_short'] = ta.ema(close=price_df['Close'], length=ma_period_short)
-        price_df['Moving_Average_long'] = ta.ema(close=price_df['Close'], length=ma_period_long)
-    else:
-        price_df['Moving_Average_short'] = price_df['Close'].rolling(window=ma_period_short).mean()
-        price_df['Moving_Average_long'] = price_df['Close'].rolling(window=ma_period_long).mean()
-
-    fig.data = [trace for trace in fig.data if 'MA' not in trace.name]
-
-    if ma_period_short > 1:
-        fig.add_trace(go.Scatter(
-            x=price_df.index,
-            y=price_df['Moving_Average_short'],
-            mode='lines',
-            line=dict(color='#FF5500', width=1),
-            name=f'{ma_period_short}-MA'
-        ))
-    fig.add_trace(go.Scatter(
-    x=price_df.index,
-    y=price_df['Moving_Average_long'],
-    mode='lines',
-    line=dict(color='lightgreen', width=1),
-    name=f'{ma_period_long}-MA'
-    ))
-
-    fig.data = list(fig.data[1:]) + [fig.data[0]]
-
-    fig.data[-1].update(showlegend=False)
-
-    return fig
-
-def add_channels(fig, ticker_data, period, interval, trb_length, trb_width):
-    price_df = ticker_data.history(period=period, interval = interval)
-    price_df['Max'] = price_df['Close'].rolling(window=trb_length).max()
-    price_df['Min'] = price_df['Close'].rolling(window=trb_length).min()
-
-    condition = price_df['Max'] > price_df['Min'] * (1 + trb_width)
-    price_df.loc[condition, ['Max', 'Min']] = np.nan
-
-    fig.data = [trace for trace in fig.data if 'Range' not in trace.name]
-
-    fig.add_trace(go.Scatter(
-        x=price_df.index,
-        y=price_df['Max'],
-        mode='lines',
-        line=dict(color='lightskyblue', width=1.5),
-        name=f'{trb_length}/{trb_width}-Range Resistance'
-        ))
-    fig.add_trace(go.Scatter(
-        x=price_df.index,
-        y=price_df['Min'],
-        mode='lines',
-        line=dict(color='lightskyblue', width=1.5),
-        name=f'{trb_length}/{trb_width}-Range Support'
-        ))
-    return fig  
-
-def create_rsi(ticker_data, period, interval, rsi_length, rsi_thresholds, rsi_checkbox):
-    price_df = ticker_data.history(period = period, interval = interval)
-    fig = go.Figure()
-
-    price_df.ta.rsi(length = rsi_length, append=True)
-
-    fig.add_trace(go.Scatter(
-    x=price_df.index,
-    y=price_df[f'RSI_{rsi_length}'],
-    mode='lines',
-    line=dict(color='lime', width=1.5),
-    name=f'RSI-{rsi_length}'
-    ))
-
-    lower_threshold, upper_threshold = map(int, rsi_thresholds.split('/'))
-
-    fig.add_shape(
-        type="line",
-        x0=price_df.index[0],
-        y0=lower_threshold,
-        x1=price_df.index[-1],
-        y1=lower_threshold,
-        line=dict(color="#FF440B", width=1, dash="dash"),
-        name=f'Lower Threshold ({lower_threshold})'
-    )
-    fig.add_shape(
-        type="line",
-        x0=price_df.index[0],
-        y0=upper_threshold,
-        x1=price_df.index[-1],
-        y1=upper_threshold,
-        line=dict(color="#FF440B", width=1, dash="dash"),
-        name=f'Upper Threshold ({upper_threshold})'
-    )
-
-    indicator_graph_layout(fig, interval, height = 300)
-
-    if rsi_checkbox:
-        price_df.ta.sma(close = f"RSI_{rsi_length}", length = rsi_length, append=True)
-
-        fig.add_trace(go.Scatter(
-            x=price_df.index,
-            y=price_df[f'SMA_{rsi_length}'],
-            mode='lines',
-            line=dict(color='#FF5500', width=1),
-            name=f'{rsi_length}-MA'
-        ))
-
-    return fig 
-
-def create_macd(ticker_data, period, interval, macd_fast, macd_slow, macd_signal):
-    price_df = ticker_data.history(period = period, interval = interval)
-    fig = go.Figure()
-
-    price_df.ta.macd(close = "Close", fast = macd_fast, slow = macd_slow, signal = macd_signal, append=True)
-
-    fig.add_trace(go.Scatter(
-    x=price_df.index,
-    y=price_df[f'MACD_{macd_fast}_{macd_slow}_{macd_signal}'],
-    mode='lines',
-    line=dict(color='lime', width=1.5),
-    name='MACD_line'
-    ))
-
-    fig.add_trace(go.Scatter(
-    x=price_df.index,
-    y=price_df[f'MACDs_{macd_fast}_{macd_slow}_{macd_signal}'],
-    mode='lines',
-    line=dict(color='#FF5500', width=1.5),
-    name='Signal_line'
-    ))
-
-    fig.add_trace(go.Bar(
-        x=price_df.index,
-        y=price_df[f'MACDh_{macd_fast}_{macd_slow}_{macd_signal}'],
-        marker_color='#FF440B',
-        name='MACD_Histogram'
-    ))
-
-    indicator_graph_layout(fig, interval)
-
-    return fig 
-
-def create_dmi(ticker_data, period, interval, length, adx_smoothing):
-    price_df = ticker_data.history(period = period, interval = interval)
-    fig = go.Figure()
-
-    price_df.ta.adx(close = "Close", length = length, lensig = adx_smoothing, append=True)
-
-    fig.add_trace(go.Scatter(
-    x=price_df.index,
-    y=price_df[f'ADX_{adx_smoothing}'],
-    mode='lines',
-    line=dict(color='#FF5500', width=1.5),
-    name='ADX'
-    ))
-
-    fig.add_trace(go.Scatter(
-    x=price_df.index,
-    y=price_df[f'DMP_{length}'],
-    mode='lines',
-    line=dict(color='lime', width=1.5),
-    name='DI+'
-    ))
-
-    fig.add_trace(go.Scatter(
-    x=price_df.index,
-    y=price_df[f'DMN_{length}'],
-    mode='lines',
-    line=dict(color='#FF440B', width=1.5),
-    name='DI-'
-    ))
-
-    indicator_graph_layout(fig, interval)
-
-    return fig 
-
-#EXECUTE TA GRAPHS
-def execute_ma(ticker_data, period_input, interval_input, graph,
-               ma_short, ma_long, ema_checkbox,
-               graph_place):
-    if ma_short >= ma_long:
-        st.error("The parameter for the short MA should be smaller than the parameter for the long MA. Please insert valid values.", icon="❗")
-    else:
-        st.session_state.graph = add_mas(graph, ticker_data, period_input, interval_input, ma_short, ma_long, ema_checkbox)
-        graph_place.plotly_chart(st.session_state.graph, config=dict(scrollZoom=True))
-
-def execute_trb(ticker_data, period_input, interval_input, graph,
-               trb_length, trb_width,
-               graph_place):
-    st.session_state.graph = add_channels(graph, ticker_data, period_input, interval_input, trb_length, trb_width)
-    graph_place.plotly_chart(st.session_state.graph, config=dict(scrollZoom=True))
-
-def execute_rsi(ticker_data, period_input, interval_input,
-               rsi_length, rsi_thresholds, rsi_checkbox,
-               RSI_place):
-    rsi_graph = create_rsi(ticker_data, period_input, interval_input, rsi_length, rsi_thresholds, rsi_checkbox)
-    RSI_place.plotly_chart(rsi_graph, config=dict(scrollZoom=True))
-
-def execute_macd(ticker_data, period_input, interval_input,
-               macd_fast, macd_slow, macd_signal,
-               MACD_place):
-    if macd_fast >= macd_slow:
-        st.error("The parameter for the fast MA should be smaller than the parameter for the slow MA. Please insert valid values.", icon="❗")  
-    else:
-        macd_graph = create_macd(ticker_data, period_input, interval_input, macd_fast, macd_slow, macd_signal)
-        MACD_place.plotly_chart(macd_graph, config=dict(scrollZoom=True))
-
-def execute_dmi(ticker_data, period_input, interval_input,
-               dmi_length, adx_smoothing,
-               DMI_place):
-        dmi_graph = create_dmi(ticker_data, period_input, interval_input, dmi_length, adx_smoothing)
-        DMI_place.plotly_chart(dmi_graph, config=dict(scrollZoom=True))
+#-------------------------------------------------------
+#TA SECTION
+#-------------------------------------------------------
 
 def execute_ta(selected_indicators, ticker_data, period_input, interval_input, graph,
                graph_place, RSI_place, MACD_place, DMI_place,
                ma_short, ma_long, ema_checkbox, rsi_length, rsi_thresholds, rsi_checkbox, 
                macd_fast, macd_slow, macd_signal, dmi_length, adx_smoothing, trb_length, trb_width):
     if "Moving Average" in selected_indicators:
-        execute_ma(ticker_data, period_input, interval_input, graph,
+        ind.execute_ma(ticker_data, period_input, interval_input, graph,
                    ma_short, ma_long, ema_checkbox,
                    graph_place)
 
     if "Relative Strength Index (RSI)" in selected_indicators:  
-        execute_rsi(ticker_data, period_input, interval_input,
+        ind.execute_rsi(ticker_data, period_input, interval_input,
                     rsi_length, rsi_thresholds, rsi_checkbox, 
                     RSI_place)
 
     if "Moving Average Converge Divergence (MACD)" in selected_indicators:
-        execute_macd(ticker_data, period_input, interval_input,
+        ind.execute_macd(ticker_data, period_input, interval_input,
                     macd_fast, macd_slow, macd_signal,
                     MACD_place)
 
     if "Directional Movement Index (DMI)" in selected_indicators:  
-        execute_dmi(ticker_data, period_input, interval_input,
+        ind.execute_dmi(ticker_data, period_input, interval_input,
                     dmi_length, adx_smoothing,
                     DMI_place)
     if "Trading Range Breakout" in selected_indicators:
-        execute_trb(ticker_data, period_input, interval_input, graph,
+        ind.execute_trb(ticker_data, period_input, interval_input, graph,
                     trb_length, trb_width,
                     graph_place)
 
+#--------------------------
+#ANALYSIS
+#--------------------------
 
-def add_ta_to_df(ticker_data, period_input, interval_input, selected_indicators,
-                ma_short, ma_long, ema_checkbox, rsi_length, rsi_thresholds,
-                macd_fast, macd_slow, macd_signal, dmi_length, adx_smoothing, trb_length, trb_width, trb_num_periods_to_hold):
-    price_df = ticker_data.history(period = period_input, interval = interval_input)
-    
-    price_df['logreturns']=np.log(price_df['Close'] / price_df['Close'].shift(1))
-    
-    if 'Moving Average' in selected_indicators:
-        if ema_checkbox:
-            price_df['Moving_Average_short'] = ta.ema(close=price_df['Close'], length=ma_short)
-            price_df['Moving_Average_long'] = ta.ema(close=price_df['Close'], length=ma_long)
-        else:
-            price_df['Moving_Average_short'] = price_df['Close'].rolling(window=ma_short).mean()
-            price_df['Moving_Average_long'] = price_df['Close'].rolling(window=ma_long).mean()
-        
-        price_df['MA_Signal'] = (price_df['Moving_Average_short'] >= price_df['Moving_Average_long']).shift(1).fillna(False).astype(int).replace({0: -1, 1: 1})
-        price_df['MA_Signal'].iloc[:ma_long] = None
-        price_df['MA_returns'] = price_df['MA_Signal']*price_df['logreturns']
-
-    if "Relative Strength Index (RSI)" in selected_indicators:
-        price_df.ta.rsi(length = rsi_length, append=True)
-        lower_threshold, upper_threshold = map(int, rsi_thresholds.split('/'))
-
-        price_df['RSI_Signal'] = price_df[f'RSI_{rsi_length}'].apply(lambda x: -1 if x > upper_threshold else (1 if x < lower_threshold else 0)).shift(1)
-        price_df['RSI_Signal'].iloc[:(rsi_length+1)] = None
-        price_df['RSI_returns'] = price_df['RSI_Signal']*price_df['logreturns']
-
-    if "Moving Average Converge Divergence (MACD)" in selected_indicators:
-        price_df.ta.macd(close = "Close", fast = macd_fast, slow = macd_slow, signal = macd_signal, append=True)
-
-        price_df['MACD_Signal'] = price_df[f'MACDh_{macd_fast}_{macd_slow}_{macd_signal}'].apply(lambda x: -1 if x < 0 else (1 if x > 0 else 0)).shift(1)
-        price_df['MACD_Signal'].iloc[:(macd_slow+macd_signal-1)] = None
-        price_df['MACD_returns'] = price_df['MACD_Signal']*price_df['logreturns']
-
-    if "Directional Movement Index (DMI)" in selected_indicators:
-        price_df.ta.adx(close = "Close", length = dmi_length, lensig = adx_smoothing, append=True)
-
-        price_df['DMI_Signal'] = (price_df[f'DMP_{dmi_length}'] >= price_df[f'DMN_{dmi_length}']).shift(1).fillna(False).astype(int).replace({0: -1, 1: 1})
-        price_df['DMI_Signal'].iloc[:(dmi_length+1)] = None
-        price_df['DMI_returns'] = price_df['DMI_Signal']*price_df['logreturns']
-
-    if "Trading Range Breakout" in selected_indicators:
-        price_df['Max'] = price_df['Close'].rolling(window=trb_length).max()
-        price_df['Min'] = price_df['Close'].rolling(window=trb_length).min()
-
-        price_df['TRB_Condition'] = (price_df['Max'] < (price_df['Min']*(1 + trb_width))).fillna(False).astype(int)
-
-        price_df['Prev_Max'] = price_df['Max'].shift(1)
-        price_df['Prev_Min'] = price_df['Min'].shift(1)
-
-        price_df['TRB_Signal'] = price_df.apply(
-            lambda row: 1 if row['Close'] > row['Prev_Max'] and row['TRB_Condition'] == 1 else
-                        -1 if row['Close'] < row['Prev_Min'] and row['TRB_Condition'] == 1 else 0,
-            axis=1
-        ).shift(1)
-
-        price_df['TRB_Signal'].iloc[:trb_length] = None
-
-        modified_signal = price_df['TRB_Signal'].copy()
-        #Holding period after the signal
-        for i in range(1, len(modified_signal)):
-            if modified_signal[i-1] == 0 and modified_signal[i] in [-1, 1]:
-                value_to_keep = modified_signal[i]
-                for j in range(1, trb_num_periods_to_hold):
-                    if i + j < len(modified_signal) and modified_signal[i + j] == 0:
-                        modified_signal[i + j] = value_to_keep
-                    elif i + j < len(modified_signal) and modified_signal[i + j] == -value_to_keep:
-                        break
-
-        price_df['TRB_Signal'] = modified_signal
-
-        price_df['TRB_returns'] = price_df['TRB_Signal']*price_df['logreturns']
-
-    return price_df
-
+#SUPPORT (STATISTICS)
 def calculate_num_trades(col):
     num_signals = 0
     for i in range(1, len(col)):
@@ -513,6 +194,82 @@ def mean_trade_length(col_signals):
     mean = np.mean(trade_lengths)  
     return mean
 
+#MAIN (STATISTICS)
+def add_ta_to_df(ticker_data, period_input, interval_input, selected_indicators,
+                ma_short, ma_long, ema_checkbox, rsi_length, rsi_thresholds,
+                macd_fast, macd_slow, macd_signal, dmi_length, adx_smoothing, trb_length, trb_width, trb_num_periods_to_hold):
+    price_df = ticker_data.history(period = period_input, interval = interval_input)
+    
+    price_df['logreturns']=np.log(price_df['Close'] / price_df['Close'].shift(1))
+    
+    if 'Moving Average' in selected_indicators:
+        if ema_checkbox:
+            price_df['Moving_Average_short'] = ta.ema(close=price_df['Close'], length=ma_short)
+            price_df['Moving_Average_long'] = ta.ema(close=price_df['Close'], length=ma_long)
+        else:
+            price_df['Moving_Average_short'] = price_df['Close'].rolling(window=ma_short).mean()
+            price_df['Moving_Average_long'] = price_df['Close'].rolling(window=ma_long).mean()
+        
+        price_df['MA_Signal'] = (price_df['Moving_Average_short'] >= price_df['Moving_Average_long']).shift(1).fillna(False).astype(int).replace({0: -1, 1: 1})
+        price_df['MA_Signal'].iloc[:ma_long] = None
+        price_df['MA_returns'] = price_df['MA_Signal']*price_df['logreturns']
+
+    if "Relative Strength Index (RSI)" in selected_indicators:
+        price_df.ta.rsi(length = rsi_length, append=True)
+        lower_threshold, upper_threshold = map(int, rsi_thresholds.split('/'))
+
+        price_df['RSI_Signal'] = price_df[f'RSI_{rsi_length}'].apply(lambda x: -1 if x > upper_threshold else (1 if x < lower_threshold else 0)).shift(1)
+        price_df['RSI_Signal'].iloc[:(rsi_length+1)] = None
+        price_df['RSI_returns'] = price_df['RSI_Signal']*price_df['logreturns']
+
+    if "Moving Average Converge Divergence (MACD)" in selected_indicators:
+        price_df.ta.macd(close = "Close", fast = macd_fast, slow = macd_slow, signal = macd_signal, append=True)
+
+        price_df['MACD_Signal'] = price_df[f'MACDh_{macd_fast}_{macd_slow}_{macd_signal}'].apply(lambda x: -1 if x < 0 else (1 if x > 0 else 0)).shift(1)
+        price_df['MACD_Signal'].iloc[:(macd_slow+macd_signal-1)] = None
+        price_df['MACD_returns'] = price_df['MACD_Signal']*price_df['logreturns']
+
+    if "Directional Movement Index (DMI)" in selected_indicators:
+        price_df.ta.adx(close = "Close", length = dmi_length, lensig = adx_smoothing, append=True)
+
+        price_df['DMI_Signal'] = (price_df[f'DMP_{dmi_length}'] >= price_df[f'DMN_{dmi_length}']).shift(1).fillna(False).astype(int).replace({0: -1, 1: 1})
+        price_df['DMI_Signal'].iloc[:(dmi_length+1)] = None
+        price_df['DMI_returns'] = price_df['DMI_Signal']*price_df['logreturns']
+
+    if "Trading Range Breakout" in selected_indicators:
+        price_df['Max'] = price_df['Close'].rolling(window=trb_length).max()
+        price_df['Min'] = price_df['Close'].rolling(window=trb_length).min()
+
+        price_df['TRB_Condition'] = (price_df['Max'] < (price_df['Min']*(1 + trb_width))).fillna(False).astype(int)
+
+        price_df['Prev_Max'] = price_df['Max'].shift(1)
+        price_df['Prev_Min'] = price_df['Min'].shift(1)
+
+        price_df['TRB_Signal'] = price_df.apply(
+            lambda row: 1 if row['Close'] > row['Prev_Max'] and row['TRB_Condition'] == 1 else
+                        -1 if row['Close'] < row['Prev_Min'] and row['TRB_Condition'] == 1 else 0,
+            axis=1
+        ).shift(1)
+
+        price_df['TRB_Signal'].iloc[:trb_length] = None
+
+        modified_signal = price_df['TRB_Signal'].copy()
+        #Holding period after the signal
+        for i in range(1, len(modified_signal)):
+            if modified_signal[i-1] == 0 and modified_signal[i] in [-1, 1]:
+                value_to_keep = modified_signal[i]
+                for j in range(1, trb_num_periods_to_hold):
+                    if i + j < len(modified_signal) and modified_signal[i + j] == 0:
+                        modified_signal[i + j] = value_to_keep
+                    elif i + j < len(modified_signal) and modified_signal[i + j] == -value_to_keep:
+                        break
+
+        price_df['TRB_Signal'] = modified_signal
+
+        price_df['TRB_returns'] = price_df['TRB_Signal']*price_df['logreturns']
+
+    return price_df
+
 def calculate_statistics_buyandhold(col_returns, periods):
     stats = {}
     
@@ -588,14 +345,17 @@ def calculate_statistics(col_returns, col_signals, periods):
     
     return stats
 
+#--------------------------
+
+#SUPPORT (STYLES)
 def color_high_green(val, reference):
-                if val > reference:
-                    color = 'lime'  
-                elif val < reference:
-                    color = '#FF440B'
-                else:
-                    color = '#f2e1e1'
-                return f'color: {color}'
+    if val > reference:
+        color = 'lime'  
+    elif val < reference:
+        color = '#FF440B'
+    else:
+        color = '#f2e1e1'
+    return f'color: {color}'
             
 def color_high_red(val, reference):
     if val > reference:
@@ -619,6 +379,7 @@ def color_recommendation(val):
     else:
         return ''
 
+#MAIN (FINAL DATA FRAME + STYLES) 
 def do_ta_analysis(price_df):
     signal_columns = [col for col in price_df.columns if col.endswith('_Signal')]
 
@@ -651,11 +412,7 @@ def apply_styles_df(ta_statistics):
                                                                                                                                 'Max Drawdown'])
     
     ta_statistics_styled = ta_statistics_styled.applymap(lambda val: color_high_red(val, get_bh_value(val, ta_statistics)), subset = ['St. Dev.'])
-    ta_statistics_styled = ta_statistics_styled.format({'Total Return': lambda x: f'{x*100:.2f}%', 'Ann. Mean Return': lambda x: f'{x*100:.2f}%', 
-                                                        'St. Dev.': lambda x: f'{x*100:.2f}%', 'Max Drawdown': lambda x: f'{x*100:.2f}%',
-                                                        'Pct. Win. Trades': lambda x: f'{x*100:.2f}%', 'Pct. Losing Trades': lambda x: f'{x*100:.2f}%',
-                                                        'Num. Trades': '{:.0f}', 'Win. Trades': '{:.0f}', 'Losing Trades': '{:.0f}', 'Avg. Trade Duration': '{:.1f}',
-                                                        'Sharpe': '{:.2f}', 'Sortino': '{:.2f}', 'Win/Loss Ratio': '{:.2f}'})
+    ta_statistics_styled = ta_statistics_styled.format(c.styles_statistics_df)
     ta_statistics_styled = ta_statistics_styled.applymap(lambda x: color_recommendation(x), subset = ['Current Recommendation'])
 
     return ta_statistics_styled
@@ -681,7 +438,9 @@ def current_recommendation(ta_statistics):
     st.markdown("<h4 style='text-align: center; font-size: 20px; font-family: serif;'>CURRENT TRADE RECOMMENDATION BASED ON THE SELECTED INDICATORS:</h4>", unsafe_allow_html=True)
     st.markdown(f"<h2 style='text-align: center; font-size: 35px; font-family: serif; background-color: {background_color}; border-radius: 15px; padding: 10px;'>{recommendation}</h2>", unsafe_allow_html=True)   
 
+#-------------------------------------------------------
 #INFO SECTION
+#-------------------------------------------------------
 
 def format_value(value):
     suffixes = ["", "K", "M", "B", "T"]
