@@ -1,3 +1,4 @@
+#Used in web.py
 styles_option_menu = {
     "container": {
         "padding": "0!important",  
@@ -22,6 +23,7 @@ styles_option_menu = {
     },
 } 
 
+#Used in main.py
 styles_statistics_df = {
     'Total Return': lambda x: f'{x*100:.2f}%', 'Ann. Mean Return': lambda x: f'{x*100:.2f}%', 
     'St. Dev.': lambda x: f'{x*100:.2f}%', 'Max Drawdown': lambda x: f'{x*100:.2f}%',

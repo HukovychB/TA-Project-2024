@@ -11,6 +11,25 @@ from libraries import indicators as ind, constants as c
 #MAIN (INITIAL INTERACTION)
 #-------------------------------------------------------
 def fetch_data(ticker_input, period, interval):
+    """
+    Fetches historical price data for a specified ticker from Yahoo Finance.
+
+    Args:
+        ticker_input (str): Ticker symbol of the stock or asset.
+        period (str): Period for fetching historical data (e.g., '1y', '3mo', 'max').
+        interval (str): Interval for fetching historical data (e.g., '1d', '1h', '5m').
+
+    Returns:
+        yfinance.Ticker: Object containing historical data for the specified ticker.
+
+    Raises:
+        StreamlitAPIException: If the interval '5m' is selected with a period other than '1mo',
+                            or if the ticker symbol is not recognized.
+
+    Notes:
+        - Uses Yahoo Finance API to retrieve historical price data.
+        - Displays an error message via Streamlit if there are issues with the input parameters or data retrieval.
+    """
     ticker_data = yf.Ticker(ticker_input)
     price = ticker_data.history(period = 'max')
 
@@ -22,6 +41,21 @@ def fetch_data(ticker_input, period, interval):
         st.error("Error: The ticker is not recognized. Please provide a valid symbol listed on Yahoo Finance (https://finance.yahoo.com/).", icon="🚨")
 
 def create_graph(ticker_data, period, interval):
+    """
+    Creates a Plotly figure displaying a candlestick chart for historical price data of a specified ticker.
+
+    Args:
+        ticker_data (pandas.DataFrame): Historical data of the ticker.
+        period (str): Period for fetching historical data (e.g., '1y', '3mo').
+        interval (str): Interval for fetching historical data (e.g., '1d', '1h', '5m').
+
+    Returns:
+        plotly.graph_objs._figure.Figure: Plotly figure object displaying the candlestick chart.
+
+    Notes:
+        - Candlestick chart shows Open, High, Low, and Close prices over time.
+        - Updates the figure layout with appropriate title, axis configurations, and styling.
+    """
     price_df = ticker_data.history(period = period, interval = interval)
     fig = go.Figure()
 
@@ -50,7 +84,7 @@ def create_graph(ticker_data, period, interval):
             showline=False,
             linecolor='dimgrey',            
             gridcolor='black',
-            rangebreaks= rangebreaks(interval),
+            rangebreaks= ind.rangebreaks(interval),
             tickfont=dict(family='serif', size=12, color='linen')                
         ),
         yaxis=dict(
@@ -79,6 +113,36 @@ def execute_ta(selected_indicators, ticker_data, period_input, interval_input, g
                graph_place, RSI_place, MACD_place, DMI_place,
                ma_short, ma_long, ema_checkbox, rsi_length, rsi_thresholds, rsi_checkbox, 
                macd_fast, macd_slow, macd_signal, dmi_length, adx_smoothing, trb_length, trb_width):
+    """
+    Plots selected technical analysis indicators on a specified graphs based on user input.
+
+    Args:
+        selected_indicators (list): List of selected indicators to execute.
+        ticker_data (pandas.DataFrame): Historical price data of the ticker.
+        period_input (str): Period for fetching historical data (e.g., '1y', '3mo').
+        interval_input (str): Interval for fetching historical data (e.g., '1d', '1h', '5m').
+        graph (plotly.graph_objs._figure.Figure): Plotly figure object to update.
+        graph_place: Placeholder for displaying the main graph.
+        RSI_place: Placeholder for displaying the RSI graph.
+        MACD_place: Placeholder for displaying the MACD graph.
+        DMI_place: Placeholder for displaying the DMI graph.
+        ma_short (int): Period for short moving average.
+        ma_long (int): Period for long moving average.
+        ema_checkbox (bool): If True, calculates exponential moving averages (EMAs); otherwise, calculates simple moving averages (SMAs).
+        rsi_length (int): Length of RSI calculation period.
+        rsi_thresholds (str): Lower and upper RSI thresholds separated by '/' (e.g., '30/70').
+        rsi_checkbox (bool): If True, calculates and plots the SMA of RSI.
+        macd_fast (int): Fast length for MACD calculation.
+        macd_slow (int): Slow length for MACD calculation.
+        macd_signal (int): Signal length for MACD calculation.
+        dmi_length (int): Length for calculating DMI.
+        adx_smoothing (int): Smoothing period for ADX calculation.
+        trb_length (int): Length of the trading range boundary window.
+        trb_width (float): Width multiplier for trading range boundaries as a percentage of the support.
+
+    Returns:
+        None
+    """
     if "Moving Average" in selected_indicators:
         ind.execute_ma(ticker_data, period_input, interval_input, graph,
                    ma_short, ma_long, ema_checkbox,
@@ -109,6 +173,19 @@ def execute_ta(selected_indicators, ticker_data, period_input, interval_input, g
 
 #SUPPORT (STATISTICS)
 def calculate_num_trades(col):
+    """
+    Calculates the number of trades based on a column of signals.
+
+    Args:
+        col (pandas.Series): Column of signals, indicating buy/sell/neutral (1/-1/0) signals.
+
+    Returns:
+        int: Number of distinct trading signals detected.
+
+    Notes:
+        - Trade is initiated when the value of signal changes to either 1 or -1 and is closed when the value changes to any other.
+        - Ignores NaN values in the column.
+    """
     num_signals = 0
     for i in range(1, len(col)):
         if col[i] != col[i-1] and col[i] != 0 and not pd.isna(col[i]):
@@ -117,6 +194,20 @@ def calculate_num_trades(col):
     return num_signals
 
 def win_lose_trades(col_signals, col_returns):
+    """
+    Calculates the number of winning and losing trades based on trading signals and corresponding returns.
+
+    Args:
+        col_signals (pandas.Series): Column of signals indicating buy/sell/neutral (1/-1/0) signals.
+        col_returns (pandas.Series): Column of returns corresponding to the signals.
+
+    Returns:
+        list: A list containing the number of winning trades and losing trades.
+
+    Notes:
+        - Trade is initiated when the value of signal changes to either 1 or -1 and is closed when the value changes to any other.
+        - Ignores NaN values in the columns.
+    """
     winning_trades = 0
     losing_trades = 0
     returns_per_trade = []
@@ -167,6 +258,20 @@ def win_lose_trades(col_signals, col_returns):
     return result
 
 def mean_trade_length(col_signals):
+    """
+    Calculates the mean duration of trading positions based on a column of signals.
+
+    Args:
+        col_signals (pandas.Series): Column of signals, typically indicating buy/sell/neutral (1/-1/0) signals.
+
+    Returns:
+        float: Mean length of trading positions in periods.
+
+    Notes:
+        - Assumes signals are represented as 1 (buy) or -1 (sell).
+        - Ignores periods with no trading signal (0).
+        - Computes the average length of consecutive periods with the same trading signal.
+    """
     trade_lengths = []
     current_trade_length = 0
     in_trade = False
@@ -198,6 +303,37 @@ def mean_trade_length(col_signals):
 def add_ta_to_df(ticker_data, period_input, interval_input, selected_indicators,
                 ma_short, ma_long, ema_checkbox, rsi_length, rsi_thresholds,
                 macd_fast, macd_slow, macd_signal, dmi_length, adx_smoothing, trb_length, trb_width, trb_num_periods_to_hold):
+    """
+    Adds technical analysis signals and corresponding returns to a DataFrame based on selected indicators.
+
+    Args:
+        ticker_data (yfinance.Ticker): Ticker data object containing historical data.
+        period_input (str): Period for fetching historical data (e.g., '1y', '5d', 'max').
+        interval_input (str): Interval for fetching historical data (e.g., '1d', '1h', '5m').
+        selected_indicators (list): List of selected technical indicators to calculate and add to the DataFrame.
+        ma_short (int): Short moving average period.
+        ma_long (int): Long moving average period.
+        ema_checkbox (bool): Whether to use exponential moving average (EMA) instead of simple moving average (SMA).
+        rsi_length (int): Length of RSI (Relative Strength Index).
+        rsi_thresholds (str): Lower and upper thresholds for RSI signals (e.g., '30/70').
+        macd_fast (int): Fast moving average period for MACD.
+        macd_slow (int): Slow moving average period for MACD.
+        macd_signal (int): Signal line period for MACD.
+        dmi_length (int): Length of DMI (Directional Movement Index).
+        adx_smoothing (int): Smoothing period for ADX (Average Directional Index).
+        trb_length (int): Length of the trading range boundary window.
+        trb_width (float): Width multiplier for trading range boundaries as a percentage of the support.
+        trb_num_periods_to_hold (int): Number of periods to hold TRB signals after initial detection.
+
+    Returns:
+        pandas.DataFrame: DataFrame with added columns for each selected indicator's signals and corresponding returns.
+
+    Notes:
+        - Signals are added as columns prefixed with indicator names (e.g., 'MA_Signal', 'RSI_Signal').
+        - Returns are added as columns prefixed with indicator names (e.g., 'MA_returns', 'RSI_returns').
+        - Returns are calculated based on the log returns of the 'Close' price.
+        - Handles NaN values appropriately for signal and return calculations.
+    """
     price_df = ticker_data.history(period = period_input, interval = interval_input)
     
     price_df['logreturns']=np.log(price_df['Close'] / price_df['Close'].shift(1))
@@ -271,6 +407,27 @@ def add_ta_to_df(ticker_data, period_input, interval_input, selected_indicators,
     return price_df
 
 def calculate_statistics_buyandhold(col_returns, periods):
+    """
+    Calculates and returns various statistics for a buy-and-hold strategy based on log returns.
+
+    Args:
+        col_returns (pandas.Series): Series of log returns.
+        periods (int): Number of periods in the data (e.g., number of trading days).
+
+    Returns:
+        dict: Dictionary containing calculated statistics for the buy-and-hold strategy.
+            - 'Total Return': Total cumulative return as a percentage.
+            - 'Ann. Mean Return': Annualized mean return as a percentage.
+            - 'St. Dev.': Annualized standard deviation of returns.
+            - 'Sharpe': Sharpe ratio, calculated as annualized mean return divided by standard deviation.
+            - 'Sortino': Sortino ratio, calculated using downside deviation.
+            - 'Max Drawdown': Maximum drawdown observed as a percentage.
+            - 'Equity Curve': Series representing the equity curve over time.
+
+    Notes:
+        - Equity curve is calculated based on an initial investment of $10,000.
+        - Annualized metrics are calculated assuming `periods` represent annualized units.
+    """
     stats = {}
     
     #Returns
@@ -299,6 +456,36 @@ def calculate_statistics_buyandhold(col_returns, periods):
     return stats
 
 def calculate_statistics(col_returns, col_signals, periods):
+    """
+    Calculates and returns various statistics for a trading strategy based on trading signals and their returns.
+
+    Args:
+        col_returns (pandas.Series): Series of log returns.
+        col_signals (pandas.Series): Series of trading signals (1 for buy, -1 for sell, 0 for neutral).
+        periods (int): Number of periods in the data (e.g., number of trading days).
+
+    Returns:
+        dict: Dictionary containing calculated statistics for the trading strategy.
+            - 'Total Return': Total cumulative return as a percentage.
+            - 'Ann. Mean Return': Annualized mean return as a percentage.
+            - 'St. Dev.': Annualized standard deviation of returns.
+            - 'Sharpe': Sharpe ratio, calculated as annualized mean return divided by standard deviation.
+            - 'Sortino': Sortino ratio, calculated using downside deviation.
+            - 'Max Drawdown': Maximum drawdown observed as a percentage.
+            - 'Num. Trades': Total number of trades executed.
+            - 'Win. Trades': Number of winning trades.
+            - 'Pct. Win. Trades': Percentage of winning trades.
+            - 'Losing Trades': Number of losing trades.
+            - 'Pct. Losing Trades': Percentage of losing trades.
+            - 'Win/Loss Ratio': Ratio of winning trades to losing trades.
+            - 'Avg. Trade Duration': Average duration of trades in periods.
+            - 'Current Recommendation': Current trading recommendation based on the last signal.
+            - 'Equity Curve': Series representing the equity curve over time.
+
+    Notes:
+        - Equity curve is calculated based on an initial investment of $10,000.
+        - Annualized metrics are calculated assuming `periods` represent annualized units.
+    """
     stats = {}
     
     #Returns
@@ -349,6 +536,16 @@ def calculate_statistics(col_returns, col_signals, periods):
 
 #SUPPORT (STYLES)
 def color_high_green(val, reference):
+    """
+    Determines the color of font based on value compared to a reference value.
+
+    Args:
+        val (float): Value to be colored.
+        reference (float): Reference value against which `val` is compared.
+
+    Returns:
+        str: CSS style string defining the color for the cell based on the comparison with `reference`.
+    """
     if val > reference:
         color = 'lime'  
     elif val < reference:
@@ -358,6 +555,16 @@ def color_high_green(val, reference):
     return f'color: {color}'
             
 def color_high_red(val, reference):
+    """
+    Determines the color of font based on value compared to a reference value.
+
+    Args:
+        val (float): Value to be colored.
+        reference (float): Reference value against which `val` is compared.
+
+    Returns:
+        str: CSS style string defining the color for the cell based on the comparison with `reference`.
+    """
     if val > reference:
         color = '#FF440B'  
     elif val < reference:
@@ -366,12 +573,16 @@ def color_high_red(val, reference):
         color = '#f2e1e1'
     return f'color: {color}'
 
-def get_bh_value(value, df):
-    for col in df.columns[0:6]:
-        if value in df[col].values:
-            return df.loc['B&H', col]
-
 def color_recommendation(val):
+    """
+    Returns CSS styles for coloring based on a recommendation value.
+
+    Parameters:
+    - val (str): The recommendation value ('BUY', 'SELL', or 'NEUTRAL').
+
+    Returns:
+    - str: A string containing CSS styles for color based on the recommendation.
+    """
     if val == 'BUY':
         return 'color: lime'
     elif val == 'SELL':
@@ -379,8 +590,37 @@ def color_recommendation(val):
     else:
         return ''
 
+def get_bh_value(value, df):
+    """
+    Retrieves the 'Buy and Hold' (B&H) value corresponding to a specific `value` found in a DataFrame.
+
+    Args:
+        value (any): Value used to search within the DataFrame columns.
+        df (DataFrame): DataFrame containing the B&H values.
+
+    Returns:
+        any: The B&H value corresponding to the first occurrence of `value` found in the first six columns of `df`.
+
+    Notes:
+        - This function iterates through the first six columns of `df`.
+        - It searches for `value` within each column.
+        - If `value` is found in any column, it returns the corresponding B&H value from the 'B&H' row of that column.
+    """
+    for col in df.columns[0:6]:
+        if value in df[col].values:
+            return df.loc['B&H', col]
+
 #MAIN (FINAL DATA FRAME + STYLES) 
 def do_ta_analysis(price_df):
+    """
+    Performs technical analysis (TA) on the given DataFrame containing signals and returns statistics of indicators.
+
+    Parameters:
+    - price_df (pd.DataFrame): DataFrame containing columns for signals and corresponding returns of indicators and B&H.
+
+    Returns:
+    - pd.DataFrame: DataFrame with statistics calculated for Buy & Hold and each indicator.
+    """
     signal_columns = [col for col in price_df.columns if col.endswith('_Signal')]
 
     ta_statistics = pd.DataFrame()
@@ -405,6 +645,15 @@ def do_ta_analysis(price_df):
     return ta_statistics
 
 def apply_styles_df(ta_statistics):
+    """
+    Applies styling to a DataFrame containing technical analysis statistics.
+
+    Parameters:
+    - ta_statistics (pd.DataFrame): DataFrame containing technical analysis statistics.
+
+    Returns:
+    - Styler: Styled DataFrame using Pandas Styler functionality.
+    """
     ta_statistics_styled = ta_statistics.style.applymap(lambda val: color_high_green(val, get_bh_value(val, ta_statistics)), subset=['Total Return',
                                                                                                                                 'Ann. Mean Return',
                                                                                                                                 'Sharpe',
@@ -418,6 +667,15 @@ def apply_styles_df(ta_statistics):
     return ta_statistics_styled
 
 def current_recommendation(ta_statistics):
+    """
+    Determines the current trade recommendation based on the selected indicators.
+
+    Parameters:
+    - ta_statistics (pd.DataFrame): DataFrame containing technical analysis statistics.
+
+    Returns:
+    - str: HTML formatted string displaying the current trade recommendation.
+    """
     recommendation_counts = ta_statistics['Current Recommendation'].value_counts()
     buy_count = recommendation_counts.get('BUY', 0)
     sell_count = recommendation_counts.get('SELL', 0)
