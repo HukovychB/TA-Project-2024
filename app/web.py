@@ -384,8 +384,17 @@ if st.session_state.get('search_btn', False) and st.session_state.get('ticker_in
             ta_statistics = main.do_ta_analysis(price_df)
             ta_statistics_styled = main.apply_styles_df(ta_statistics)
 
+            
             st.markdown("<h4 style='text-align: center; font-size: 25px; font-family: serif;'>TRADE STATISTICS</h4>", unsafe_allow_html=True)
             st.dataframe(ta_statistics_styled)
+
+            st.write('')
+            st.write('')
+            st.write('')
+            st.write('')
+            equity_df = main.extract_equity_curves(price_df)
+            main.plot_equity_curves(equity_df)
+
             main.current_recommendation(ta_statistics)
 
 elif search_btn:

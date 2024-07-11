@@ -45,7 +45,7 @@ def create_graph(ticker_data, period, interval):
     Creates a Plotly figure displaying a candlestick chart for historical price data of a specified ticker.
 
     Args:
-        ticker_data (pandas.DataFrame): Historical data of the ticker.
+        ticker_data (yfinance.Ticker object): yfinance data of the ticker.
         period (str): Period for fetching historical data (e.g., '1y', '3mo').
         interval (str): Interval for fetching historical data (e.g., '1d', '1h', '5m').
 
@@ -118,7 +118,7 @@ def execute_ta(selected_indicators, ticker_data, period_input, interval_input, g
 
     Args:
         selected_indicators (list): List of selected indicators to execute.
-        ticker_data (pandas.DataFrame): Historical price data of the ticker.
+        ticker_data (yfinance.Ticker object): yfinance data of the ticker.
         period_input (str): Period for fetching historical data (e.g., '1y', '3mo').
         interval_input (str): Interval for fetching historical data (e.g., '1d', '1h', '5m').
         graph (plotly.graph_objs._figure.Figure): Plotly figure object to update.
@@ -307,7 +307,7 @@ def add_ta_to_df(ticker_data, period_input, interval_input, selected_indicators,
     Adds technical analysis signals and corresponding returns to a DataFrame based on selected indicators.
 
     Args:
-        ticker_data (yfinance.Ticker): Ticker data object containing historical data.
+        ticker_data (yfinance.Ticker object): yfinance data of the ticker.
         period_input (str): Period for fetching historical data (e.g., '1y', '5d', 'max').
         interval_input (str): Interval for fetching historical data (e.g., '1d', '1h', '5m').
         selected_indicators (list): List of selected technical indicators to calculate and add to the DataFrame.
@@ -665,6 +665,99 @@ def apply_styles_df(ta_statistics):
     ta_statistics_styled = ta_statistics_styled.applymap(lambda x: color_recommendation(x), subset = ['Current Recommendation'])
 
     return ta_statistics_styled
+
+def extract_equity_curves(price_df):
+    """
+    Calculates and extracts equity curves for Buy and Hold (B&H) and various indicators from a given DataFrame.
+
+    Parameters:
+    - price_df (pd.DataFrame): DataFrame containing price data, log returns, indicator signals and their returns. The DataFrame must 
+      have columns for log returns (e.g., 'logreturns') and signal columns ending with '_Signal' for different indicators. 
+      Corresponding return columns should follow the naming convention '<indicator>_returns'.
+
+    Returns:
+    - pd.DataFrame: A DataFrame containing the equity curves for B&H and each indicator. The columns of the DataFrame 
+      represent different strategies (B&H and indicators), and the rows represent the equity curve values over time.
+    """
+    signal_columns = [col for col in price_df.columns if col.endswith('_Signal')]
+
+    equity_curves = pd.DataFrame()
+
+    #ADD B&H    
+    statistics_bh = calculate_statistics_buyandhold(price_df['logreturns'], 252)
+    statistics_for_df_bh = {key: value for key, value in statistics_bh.items() if key == 'Equity Curve'}
+    statistics_df_bh = pd.DataFrame.from_dict(statistics_for_df_bh)
+    statistics_df_bh = statistics_df_bh.rename(columns={'Equity Curve': 'B&H'})
+    equity_curves['B&H'] = statistics_df_bh['B&H']
+
+    #ADD INDICATORS
+    for col_signals in signal_columns:
+        indicator = col_signals.split('_')[0]
+        col_returns = indicator + '_returns'
+        statistics = calculate_statistics(price_df[col_returns], price_df[col_signals], 252)
+        statistics_for_df = {key: value for key, value in statistics.items() if key == 'Equity Curve'}
+        statistics_df = pd.DataFrame.from_dict(statistics_for_df)
+        statistics_df = statistics_df.rename(columns={'Equity Curve': indicator})
+        equity_curves[indicator] = statistics_df[indicator]
+    
+    return equity_curves
+
+def plot_equity_curves(equity_df):
+    """
+    Plots equity curves for multiple indicators from a DataFrame using Plotly.
+
+    Parameters:
+    - equity_df (DataFrame): DataFrame containing equity curves as columns.
+
+    Returns:
+    None
+    """
+    fig = go.Figure()
+
+    for column in equity_df.columns:
+        fig.add_trace(go.Scatter(x=equity_df.index, y=equity_df[column], mode='lines', name=column))
+    
+    fig.add_shape(
+        type='line',
+        x0=equity_df.index.min(),
+        x1=equity_df.index.max(),
+        y0=10000,
+        y1=10000,
+        line=dict(color='#f2e1e1', width=2, dash='dash')
+    )
+
+    fig.update_layout(
+        title=dict(
+            text='EQUITY CURVES (10,000$ BASE)',
+            x=0.5, 
+            xanchor='center',
+            yanchor='top',
+            font=dict(size=25, family='serif', color='linen')
+        ),
+        dragmode='pan',
+        uirevision='constant',
+        xaxis=dict(
+            showline=False,
+            linecolor='dimgrey',            
+            gridcolor='black',
+            tickfont=dict(family='serif', size=12, color='linen')                
+        ),
+        yaxis=dict(
+            showline=False,
+            linecolor='dimgrey',            
+            gridcolor='dimgrey',
+            tickfont=dict(family='serif', size=12, color='linen')           
+        ),
+        legend=dict(
+            orientation='h',
+            yanchor='bottom',
+            y=1.02,
+            xanchor='right',
+            x=1
+        )
+    )
+
+    st.plotly_chart(fig, config=dict(scrollZoom=True))
 
 def current_recommendation(ta_statistics):
     """
