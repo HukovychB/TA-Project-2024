@@ -1,9 +1,10 @@
 import streamlit as st
-import os
-from datetime import datetime
+# import os
+# from datetime import datetime
 from streamlit_lottie import st_lottie
 import json
 from streamlit_option_menu import option_menu
+import pandas as pd
 
 from libraries import main, constants as c
 
@@ -54,7 +55,7 @@ with open('app/frontend/main_style.css') as f:
 col1, col2, col3 = st.columns([1, 4, 1])
 #IES logo
 col1.image('app/frontend/ies.png', width=100)
-
+#Link to info page
 col3.page_link("pages/info_page.py", label = "About the project")
 
 #Header
@@ -73,25 +74,38 @@ with col1:
     period_input = st.selectbox("Choose time period:", ["","1mo", "3mo", "6mo", "1y", "2y", "5y", "10y", "ytd", "max"])
     interval_input = st.selectbox("Choose time frame:", ["", "5m", "1h", "1d", "1wk"])
     search_btn = st.button("SEARCH")
+    #Proper functioning of the SEARCH button
     if search_btn and not st.session_state.search_btn:
         st.session_state.ticker_input = ticker_input
         st.session_state.period_input = period_input
         st.session_state.interval_input = interval_input
         st.session_state.search_btn = True    
 with col2:
+    #Animation display
     st_lottie(animation_front, height = 400, width = 400)
 
+#FETCHING DATA AND GRAPH
 if st.session_state.get('search_btn', False) and st.session_state.get('ticker_input') and st.session_state.get('period_input') and st.session_state.get('interval_input'):
     with st.spinner("SEARCHING"):
         ticker_data = main.fetch_data(ticker_input, period_input,interval_input)
         # if 'graph' not in st.session_state or st.session_state.ticker_input != ticker_input or st.session_state.period_input != period_input:
         if search_btn:
             st.session_state.graph = main.create_graph(ticker_data, period_input, interval_input)
+        #Placeholders for the graphs
         graph_place = st.empty()
         MACD_place = st.empty()
         DMI_place = st.empty()
         RSI_place = st.empty()
+        Remove_btn_place = st.empty()
+        #Main graph
         graph_place.plotly_chart(st.session_state.graph, config=dict(scrollZoom=True))
+        if 'macd_graph' in st.session_state:
+            MACD_place.plotly_chart(st.session_state.macd_graph, config=dict(scrollZoom=True))
+        if 'dmi_graph' in st.session_state:
+            DMI_place.plotly_chart(st.session_state.dmi_graph, config=dict(scrollZoom=True))
+        if 'rsi_graph' in st.session_state:
+            RSI_place.plotly_chart(st.session_state.rsi_graph, config=dict(scrollZoom=True))
+    #2 suporting sections
     selected_page = option_menu(
             menu_title=None,
             options = ["INFO", "TECHNICAL ANALYSIS"],
@@ -100,7 +114,7 @@ if st.session_state.get('search_btn', False) and st.session_state.get('ticker_in
             styles = c.styles_option_menu
     )
 
-
+    #EVERYTHING RELATED TO THE INSTRUMENT
     if selected_page == "INFO":
         st.markdown("""
         <style>
@@ -260,18 +274,20 @@ if st.session_state.get('search_btn', False) and st.session_state.get('ticker_in
         with col3:
             st.markdown(main.html_table(biz_metrics), unsafe_allow_html=True)
 
-
+    #EVERYTHING RELATED TO TA
     if selected_page == "TECHNICAL ANALYSIS":
         selected_indicators = st.multiselect("**Select technical indicators:**", [
                     'Moving Average','Relative Strength Index (RSI)', 
                     'Directional Movement Index (DMI)', 'Moving Average Converge Divergence (MACD)',
                     'Trading Range Breakout'])
         
+        #Parameter section layout
         if selected_indicators != []:
             st.write("")
             st.markdown("<h4 style='text-align: center; font-size: 25px; font-family: serif;'>SELECT PARAMETERS FOR THE INDICATORS</h4>", unsafe_allow_html=True)
             st.write("")       
 
+        #Dynamic adjustments to the # of cols depending on the # of indicators
         num_indicator_columns = min(len(selected_indicators),3)
         indicator_columns = st.columns(num_indicator_columns)
         indicator_columns_counter = 0
@@ -283,6 +299,10 @@ if st.session_state.get('search_btn', False) and st.session_state.get('ticker_in
                 ma_long = st.number_input("Length of long moving average:", min_value=2, max_value=len(ticker_data.history(period = period_input, interval = interval_input)), value = 50)
                 ema_checkbox = st.checkbox("Use exponential moving average.")
             indicator_columns_counter = (indicator_columns_counter+1) % num_indicator_columns
+        else:
+            ma_short = None
+            ma_long = None
+            ema_checkbox = None
         if "Relative Strength Index (RSI)" in selected_indicators:
             with indicator_columns[indicator_columns_counter]:
                 st.write("**RSI**")
@@ -290,12 +310,23 @@ if st.session_state.get('search_btn', False) and st.session_state.get('ticker_in
                 rsi_thresholds = st.selectbox("Thresholds values:", ['30/70','40/60','25/75','20/80','15/85','10/90'])
                 rsi_checkbox = st.checkbox("Add simple moving average.")
             indicator_columns_counter = (indicator_columns_counter+1) % num_indicator_columns
+
+            st.session_state.rsi_graph = main.create_rsi(ticker_data, period_input, interval_input, rsi_length, rsi_thresholds, rsi_checkbox)
+        else:
+            rsi_length = None
+            rsi_thresholds = None
+            rsi_checkbox = None
         if "Directional Movement Index (DMI)" in selected_indicators:
             with indicator_columns[indicator_columns_counter]:
                 st.write("**DMI**")
                 dmi_length = st.number_input("Length of indicator:", min_value=1, max_value=len(ticker_data.history(period = period_input, interval = interval_input))-1, value = 14)
                 adx_smoothing = st.number_input("ADX smoothing:", min_value=1, max_value=len(ticker_data.history(period = period_input, interval = interval_input))-dmi_length, value = 14)
             indicator_columns_counter = (indicator_columns_counter+1) % num_indicator_columns
+
+            st.session_state.dmi_graph = main.create_dmi(ticker_data, period_input, interval_input, dmi_length, adx_smoothing)
+        else:
+            dmi_length = None
+            adx_smoothing = None
         if "Moving Average Converge Divergence (MACD)" in selected_indicators:
             with indicator_columns[indicator_columns_counter]:
                 st.write("**MACD**")
@@ -303,24 +334,63 @@ if st.session_state.get('search_btn', False) and st.session_state.get('ticker_in
                 macd_slow = st.number_input("Length of slow moving average:", min_value=2, max_value=len(ticker_data.history(period = period_input, interval = interval_input)), value = 26)
                 macd_signal = st.number_input("Length of signal moving average:", min_value=1, max_value=len(ticker_data.history(period = period_input, interval = interval_input))-macd_slow+1, value = 9)
             indicator_columns_counter = (indicator_columns_counter+1) % num_indicator_columns
+
+            st.session_state.macd_graph = main.create_macd(ticker_data, period_input, interval_input, macd_fast, macd_slow, macd_signal)
+        else:
+            macd_fast = None
+            macd_slow = None
+            macd_signal = None
         if "Trading Range Breakout" in selected_indicators:
             with indicator_columns[indicator_columns_counter]:
                 st.write("**TRADING RANGE BREAKOUT**")
                 trb_length = st.number_input("Length of indicator:", min_value=1, max_value=len(ticker_data.history(period = period_input, interval = interval_input)), value = 20)
-                trb_width = st.number_input("Width of channel:", min_value=0.000001, max_value=10.0, value = 0.1)     
+                trb_width = st.number_input("Width of channel:", min_value=0.000001, max_value=10.0, value = 0.1)
+                trb_num_periods_to_hold = st.number_input("Number of periods to hold a position:", min_value=1, max_value=10000, value = 20)     
             indicator_columns_counter = (indicator_columns_counter+1) % num_indicator_columns
+        else:
+            trb_length = None
+            trb_width = None
+            trb_num_periods_to_hold = None
 
         if selected_indicators != []:
+            st.session_state.setdefault('parameter_btn', False)
             parameter_btn = st.button("ANALYZE")
+            if parameter_btn:
+                st.session_state.parameter_btn=True
 
-        if parameter_btn:
+        #Plot indicators
+        if st.session_state.parameter_btn:
             main.execute_ta(selected_indicators, ticker_data, period_input, interval_input, st.session_state.graph,
-               ma_short, ma_long, ema_checkbox, trb_length, trb_width, rsi_length, rsi_thresholds, 
-               rsi_checkbox, macd_fast, macd_slow, macd_signal, dmi_length, adx_smoothing, 
-               graph_place, RSI_place, MACD_place, DMI_place)              
+                graph_place, RSI_place, MACD_place, DMI_place,
+                ma_short, ma_long, ema_checkbox, rsi_length, rsi_thresholds, rsi_checkbox, 
+                macd_fast, macd_slow, macd_signal, dmi_length, adx_smoothing, trb_length, trb_width)
+            
+            #Remove indicators
+            remove_indicators_btn = Remove_btn_place.button("REMOVE INDICATORS")
+            if remove_indicators_btn:
+                st.session_state.graph = main.create_graph(ticker_data, period_input, interval_input)
+                graph_place.plotly_chart(st.session_state.graph, config=dict(scrollZoom=True))
+                st.session_state.pop('macd_graph', None)
+                st.session_state.pop('dmi_graph', None)
+                st.session_state.pop('rsi_graph', None)
+                MACD_place.empty()
+                DMI_place.empty()
+                RSI_place.empty()
+
+        #ANALYSIS
+            price_df = main.add_ta_to_df(ticker_data, period_input, interval_input, selected_indicators,
+                ma_short, ma_long, ema_checkbox, rsi_length, rsi_thresholds,
+                macd_fast, macd_slow, macd_signal, dmi_length, adx_smoothing, trb_length, trb_width, trb_num_periods_to_hold)
+            
+            ta_statistics = main.do_ta_analysis(price_df)
+            ta_statistics_styled = main.apply_styles_df(ta_statistics)
+
+            st.markdown("<h4 style='text-align: center; font-size: 25px; font-family: serif;'>TRADE STATISTICS</h4>", unsafe_allow_html=True)
+            st.dataframe(ta_statistics_styled)
+            main.current_recommendation(ta_statistics)
+
 elif search_btn:
     st.error("Please enter the ticker and choose time interval.", icon="❗")
-
 
 
 # #INFO
