@@ -4,6 +4,7 @@ import plotly.graph_objs as go
 import numpy as np
 import pandas as pd
 import pandas_ta as ta
+import base64
 
 from libraries import indicators as ind, constants as c
 
@@ -817,6 +818,14 @@ def html_table(data):
     
     html += "</div>"
     return html
+
+#-------------------------------------------------------
+#INFO PAGE
+#-------------------------------------------------------
+
+def image_to_base64(image_path):
+    with open(image_path, "rb") as img:
+        return base64.b64encode(img.read()).decode('utf-8')
 
 
 
