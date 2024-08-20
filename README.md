@@ -4,12 +4,12 @@ Welcome to the Technical Analysis Web project! This project aims to create a sim
 
 ## Features and Usage
 
-- **User Input**: Enter the ticker symbols of any financial instruments from Yahoo Finance (e.g., stocks, ETFs, commodities, cryptocurrencies, etc.).
+- **User Input**: Enter the ticker symbol of any financial instrument from Yahoo Finance (e.g., stocks, ETFs, commodities, cryptocurrencies, etc.).
 - **Data Retrieval**: Fetch and display relevant financial data for the entered ticker.
 - **Interactive Graphs**: Visualize the price movements of the financial instrument with an interactive graph using daily prices.
 - **Technical Analysis Tools**: Apply various technical analysis tools (e.g., moving averages, RSI, MACD, DMI, etc.) with custom parametrization and visualize signals on the graph.
-- **Strategy Statistics**: Display statistics of returns for different strategies based on the applied technical analysis tools and chosen time horizon to see their historic performane.
-- **Currenct suggestion**: See what your chosen strategy suggest to do now.
+- **Strategy Statistics**: Display statistics of returns for different strategies based on the applied technical analysis tools and chosen time horizon to see their historical performance.
+- **Current suggestion**: See what your chosen strategy suggests to do now.
 
 ## Installation
 
@@ -19,15 +19,18 @@ To run this project locally, follow these steps:
 2.
 3. 
 
-## Dependacies
+## Dependencies
 - Streamlit: Web interface creation. 
 - yfinance: Fetching financial data.
 - Pandas: Data manipulation and analysis.
--
+- Pandas_ta: Extension with technical analysis indicators.
+- Numpy: Array manipulation.
+- Plotly: Chart generation.
+- Base64: Binary-to-text encoding.
 
 ## License
 This project is licensed under the MIT License. See the [LICENCE](LICENCE.htm) file for details.
 
 ## Contact
-For any question and concerns, please contact us at 72617770@fsv.cuni.cz or .
+For any question and concerns, please contact us at 72617770@fsv.cuni.cz or 45673694@fsv.cuni.cz.
 
