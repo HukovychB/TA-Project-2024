@@ -18,14 +18,14 @@ about_image = main.image_to_base64('app/frontend/info-about.jpg')
 indicators_image = main.image_to_base64('app/frontend/info-indicators.png')
 
 html_content_1 = f"""
-<table id="about" border="0" width="100%" cellpadding="0" cellspacing="0" bgcolor="black">
+<table id="about" border="0" width="100%" cellpadding="0" cellspacing="0" bgcolor="#f7ab48">
     <tr>
         <td>
             <table border="0" cellpadding="15" cellspacing="0" width="80%" align="center">
                 <tr>
                     <td height="180" align="center" valign="middle" colspan="2">
-                        <font face="Verdana" size="7" color="#4CAF50">WELCOME TO OUR TECHNICAL ANALYSIS PROJECT</font>
-                        <hr color="#4CAF50" width="90">
+                        <font face="Verdana" size="7" color="#030804">WELCOME TO OUR TECHNICAL ANALYSIS PROJECT</font>
+                        <hr color="#030804" width="90">
                     </td>
                 </tr>
                 <tr>
@@ -33,35 +33,35 @@ html_content_1 = f"""
                         <img src="data:image/jpeg;base64,{about_image}" style="max-width: 100%; height: auto; display: block;">
                     </td>
                     <td style="width: 60%; vertical-align: top;">
-                        <font face="Verdana" size="4" color="white">
+                        <font face="Verdana" size="4" color="black">
                             The website allows you to input tickers of all financial instruments from Yahoo Finance, displays relevant information about them, and provides interactive price graphs.
-                            <hr color="black">
+                            <hr color="#f7ab48">
                             You can choose from different technical analysis strategies with custom parametrization and compare their historical performance.
                         </font>
                     </td>
                 </tr>
             </table>
-            <hr color="black">
-            <hr color="black">
-            <hr color="black">
+            <hr color="#f7ab48">
+            <hr color="#f7ab48">
+            <hr color="#f7ab48">
         </td>
     </tr>
 </table>
 """
 
 html_content_2 = """ 
-<table id="strategy" border="0" width="100%" cellpadding="0" cellspacing="0" bgcolor="black">
+<table id="strategy" border="0" width="100%" cellpadding="0" cellspacing="0" bgcolor="#f7ab48">
     <tr>
         <td>
             <table border="0" cellpadding="15" cellspacing="0" width="80%" align="center">
                 <tr>
                     <td height="180" align="center" valign="middle">
-                        <font face="Verdana" size="7" color="#4CAF50">CHOOSE YOUR OWN TRADING STRATEGY AND TIME HORIZON<hr color="#4CAF50" width="100"></font>
+                        <font face="Verdana" size="7" color="#030804">CHOOSE YOUR OWN TRADING STRATEGY AND TIME HORIZON<hr color="#030804" width="100"></font>
                     </td>
                 </tr>
                 <tr>
                     <td>
-                        <font face="Verdana" size="4" color="white">
+                        <font face="Verdana" size="4" color="black">
                             <ul>
                                 <li>
                                     <b>ENTER THE TICKER OF FINANCIAL INSTRUMENT</b>
@@ -70,19 +70,19 @@ html_content_2 = """
                                         <li>View relevant financial information for the instrument.</li>
                                     </ul>
                                 </li>
-                                <li><hr color="black"><b>VISUALIZE THE PRICE MOVEMENTS</b>
+                                <li><hr color="#f7ab48"><b>VISUALIZE THE PRICE MOVEMENTS</b>
                                     <ul>
                                         <li>Select time period and time frame to be displayed for historical price data of the specified ticker.</li>
                                         <li>Candlestick chart shows Open, High, Low, and Close prices over time.</li>
                                     </ul>
                                 </li>
-                                <li><hr color="black"><b>APPLY VARIOUS TECHNICAL ANALYSIS TOOLS</b>
+                                <li><hr color="#f7ab48"><b>APPLY VARIOUS TECHNICAL ANALYSIS TOOLS</b>
                                     <ul>
                                         <li>Choose from 5 different technical analysis indicators with custom parametrization.</li>
                                         <li>See trade statistics and equity curves resulting from the selected strategies.</li>
                                     </ul>
                                 </li>
-                                <li><hr color="black"><b>SEE CURRENT TRADE RECOMMENDATION</b>
+                                <li><hr color="#f7ab48"><b>SEE CURRENT TRADE RECOMMENDATION</b>
                                 </li>
                             </ul>
                         </font>

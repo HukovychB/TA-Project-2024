@@ -15,9 +15,20 @@ Welcome to the Technical Analysis Web project! This project aims to create a sim
 
 To run this project locally, follow these steps:
 
-1.
-2.
-3. 
+1. **Install Streamlit**: Ensure that you have Streamlit installed. You can install it using pip. Open your terminal and run:
+```
+pip install streamlit
+```
+2. **Clone the repository**: Open your terminal and run the following command to clone the <code>main</code> branch of the repository:
+```
+git clone -b main https://github.com/HukovychB/TA-Project-2024.git
+```
+3. **Navigate to the directory**: Use your terminal to navigate to the directory where the <code>web.py</code> file is located.
+4. **Run the Streamlit app**: Once you are in the correct directory, run the Streamlit command:
+```
+streamlit run web.py
+```
+5. **Open in browser**: This command will start a local web server and provide a URL (typically <code>http://localhost:8501</code>) which you can open in your web browser to view and interact with your Streamlit app.
 
 ## Dependencies
 - Streamlit: Web interface creation. 
