@@ -310,7 +310,7 @@ if st.session_state.get('search_btn', False) and st.session_state.get('ticker_in
                 rsi_checkbox = st.checkbox("Add simple moving average.")
             indicator_columns_counter = (indicator_columns_counter+1) % num_indicator_columns
 
-            st.session_state.rsi_graph = ind.create_rsi(ticker_data, period_input, interval_input, rsi_length, rsi_thresholds, rsi_checkbox)
+            # st.session_state.rsi_graph = ind.create_rsi(ticker_data, period_input, interval_input, rsi_length, rsi_thresholds, rsi_checkbox)
         else:
             rsi_length = None
             rsi_thresholds = None
@@ -322,7 +322,7 @@ if st.session_state.get('search_btn', False) and st.session_state.get('ticker_in
                 adx_smoothing = st.number_input("ADX smoothing:", min_value=1, max_value=len(ticker_data.history(period = period_input, interval = interval_input))-dmi_length, value = 14)
             indicator_columns_counter = (indicator_columns_counter+1) % num_indicator_columns
 
-            st.session_state.dmi_graph = ind.create_dmi(ticker_data, period_input, interval_input, dmi_length, adx_smoothing)
+            # st.session_state.dmi_graph = ind.create_dmi(ticker_data, period_input, interval_input, dmi_length, adx_smoothing)
         else:
             dmi_length = None
             adx_smoothing = None
@@ -334,7 +334,7 @@ if st.session_state.get('search_btn', False) and st.session_state.get('ticker_in
                 macd_signal = st.number_input("Length of signal moving average:", min_value=1, max_value=len(ticker_data.history(period = period_input, interval = interval_input))-macd_slow+1, value = 9)
             indicator_columns_counter = (indicator_columns_counter+1) % num_indicator_columns
 
-            st.session_state.macd_graph = ind.create_macd(ticker_data, period_input, interval_input, macd_fast, macd_slow, macd_signal)
+            # st.session_state.macd_graph = ind.create_macd(ticker_data, period_input, interval_input, macd_fast, macd_slow, macd_signal)
         else:
             macd_fast = None
             macd_slow = None
