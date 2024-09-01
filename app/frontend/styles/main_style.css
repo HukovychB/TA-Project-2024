@@ -1,0 +1,160 @@
+/* Remove top margin */
+.main > div {
+    padding-top: 3rem;
+}
+
+/* Hide 'Deploy', 'Span', 'Deploy' and Sidebar buttons and everything else unnecessary*/
+.st-emotion-cache-w9v1j9.ef3psqc5
+{
+    visibility: hidden;            
+}
+.st-emotion-cache-czk5ss.e16jpq800
+{
+    visibility: hidden;            
+}
+.st-emotion-cache-1tqswft.eczjsme4
+{
+    visibility: hidden;            
+}      
+.stDeployButton
+{
+    visibility: hidden;            
+}
+.st-emotion-cache-ok4tyi.e1vs0wn31
+{
+    display: none;        
+}
+/*  Exception when ticker is not found */
+.stException    
+{
+    display: none;          
+} 
+/*  Element near the main heading */
+.st-emotion-cache-gi0tri.e1nzilvr1    
+{
+    display: none;            
+}
+/*  Menu at the top */
+.st-emotion-cache-1c43kqr.ezrtsby2    
+{
+    display: none;            
+} 
+
+/* Style of Page link button */
+.st-emotion-cache-t1mpcy.e11k5jya1 
+{
+    background-color: #FF5500;
+    color: #f2e1e1;
+    font-size: 32pt;
+    font-family: serif;
+    padding: 8px 20px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;  
+}
+.st-emotion-cache-d7a840 p
+{
+    color: #f2e1e1;
+    font-weight: bold;
+    font-size: 12.5pt;
+}
+
+/* Make graphs closer to each other */
+.stPlotlyChart.js-plotly-plot {
+    margin-top: -75px;
+}
+
+.st-emotion-cache-1jzia57.e1nzilvr2 {
+    width: 70%;
+    margin: 0 auto;
+}
+
+/* INFO SECTION */
+.custom-table {
+    margin: 0;
+    padding: 4px;
+    width: calc(129px + 50%);
+    font: 11px Arial, Helvetica, sans-serif;
+    color: #747474;
+    background-color: #0c2a62;
+    box-sizing: border-box;
+    border: 1px solid #ced9ec;
+    border-radius: 4px;
+}
+
+.table-top {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 46px;
+    border-top: 2px solid #FFF;
+    background: #eff4ff url(frontend/top-light-blue.png) repeat-x left top;
+    border-bottom: 1px solid #ced9ec;
+    display: flex;
+    align-items: center; 
+}
+
+.table-top-cell {
+    flex: 1; 
+    padding: 15px 0;
+    text-align: center;
+    height: 31px;
+    border-right: 1px solid #ced9ec;
+    color: #1f3d71;
+    font: 13px Arial, Helvetica, sans-serif;
+    display: flex;
+    align-items: center; 
+    justify-content: center; 
+}
+
+.table-top-cell:first-child {
+    border-left: 1px solid #ced9ec;
+}
+
+.table-middle {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    background: #f6f6f6 url(frontend/center-bcg.png) repeat-y right top;
+    overflow: hidden;
+    border: 1px solid #ced9ec;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+}
+
+.table-row {
+    clear: both;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    box-sizing: border-box;
+}
+
+.table-left {
+    flex: 0 0 129px;
+    margin: 0;
+    padding: 10px 0;
+    text-align: center;
+    height: 25px;
+    border-right: 1px solid #ced9ec;
+    border-bottom: 1px solid #b3c1db;
+    color: #1f3d71;
+    font: 13px Arial, Helvetica, sans-serif;
+    display: flex;
+    align-items: center; 
+    justify-content: center; 
+}
+
+.table-right {
+    flex: 1;
+    margin: 0;
+    padding: 11px 0;
+    text-align: center;
+    height: 24px;
+    border-right: 1px solid #ced9ec;
+    border-bottom: 1px solid #b3c1db;
+    display: flex;
+    align-items: center; 
+    justify-content: center; 
+}

@@ -1,6 +1,2 @@
 **__pycache__
-*.gitkeep
-
-*.csv
-*.xlsx
-*.xls
+**.pytest_cache
