@@ -25,7 +25,7 @@ git clone -b main https://github.com/HukovychB/TA-Project-2024.git
 ```
 pip install -r requirements.txt
 ```
-This command will install all the packages listed in the `requirements.txt` file.
+This command will install all the packages listed in the `requirements.txt` file. Consider creating venv before installing the dependencies.
 
 3. **Run the Streamlit app**:
 ```
