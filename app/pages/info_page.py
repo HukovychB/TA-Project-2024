@@ -3,7 +3,7 @@ import streamlit.components.v1 as components
 
 from libraries import main
 
-with open('app/frontend/info_style.css') as f:
+with open('app/frontend/styles/info_style.css') as f:
      st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
 
 # BEGINNING
@@ -11,8 +11,7 @@ with open('app/frontend/info_style.css') as f:
 col1, col2, col3 = st.columns([1, 4, 1])
 #IES logo
 col1.image('app/frontend/ies.png', width=100)
-#Header
-#st.markdown("<h1 style='text-align: center;'>WELCOME TO OUR TECHNICAL ANALYSIS PROJECT</h1>", unsafe_allow_html=True)
+col3.page_link("web.py", label = "Back to Home")
 
 about_image = main.image_to_base64('app/frontend/info-about.jpg')
 indicators_image = main.image_to_base64('app/frontend/info-indicators.png')
@@ -130,9 +129,6 @@ html_content_3 = f"""
     </tr>
 </table>
 """
-
-with open('app/frontend/info_page_style.css') as f:
-     st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
 
 components.html(html_content_1, height=475)
 st.image('app/frontend/info-ta.webp', use_column_width=True)

@@ -22,22 +22,12 @@
 }
 .st-emotion-cache-ok4tyi.e1vs0wn31
 {
-    display: none;        
+    visibility: hidden;            
 }
-.stException     /*  Exception when ticker is not found */
+.st-emotion-cache-1iplb5l.e1nzilvr3
 {
-    display: none;          
+    display: none;            
 } 
-.st-emotion-cache-gi0tri.e1nzilvr1    /*  Element near the main heading */
-{
-    display: none;            
-}
-/*  Menu at the top */
-/* .st-emotion-cache-1c43kqr.ezrtsby2    
-{
-    display: none;            
-}  */
-
 
 /* Style of Page link button */
 .st-emotion-cache-t1mpcy.e11k5jya1 
@@ -49,7 +39,7 @@
     padding: 8px 20px;
     border: none;
     border-radius: 10px;
-    cursor: pointer;  
+    cursor: pointer;
 }
 .st-emotion-cache-d7a840 p
 {
@@ -58,12 +48,37 @@
     font-size: 12.5pt;
 }
 
-/* Make graphs closer to each other */
-.stPlotlyChart.js-plotly-plot {
-    margin-top: -75px;
+table {
+    width: 100%;
+    border: 0;
+    cellpadding: 0;
+    cellspacing: 0;
 }
 
-.st-emotion-cache-1jzia57.e1nzilvr2 {
-    width: 70%;
-    margin: 0 auto;
+#about, #strategy, #indicators {
+    margin-bottom: 50px;
+}
+
+td {
+    padding: 15px;
+}
+
+hr {
+    border: none;
+    border-top: 1px solid #4CAF50;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+#about td:first-child {
+    text-align: left;
+}
+
+.indicators-img {
+    width: 100%;
+    max-width: 100%;
 }
