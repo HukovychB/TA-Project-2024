@@ -37,7 +37,7 @@ col1, col2, col3 = st.columns([1, 4, 1])
 # IES logo
 col1.image("app/frontend/ies.png", width=100)
 # Link to info page
-col3.page_link("pages/info_page.py", label="About the project")
+# col3.page_link("pages/info_page.py", label="About the project")
 
 st.markdown(
     "<h1 style='text-align: center;'>TECHNICAL ANALYSIS TEST AREA</h1>",
