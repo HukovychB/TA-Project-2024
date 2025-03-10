@@ -34,7 +34,7 @@ streamlit run app/web.py
 5. **Open in browser**: This command will start a local web server and provide a URL (typically <code>http://localhost:8501</code>) which you can open in your web browser to view and interact with your Streamlit app.
 
 ## Dependencies
-- **numpy**==2.1.0
+- **numpy**==1.26.0
 - **pandas**==2.2.2
 - **pandas_ta**==0.3.14b0
 - **plotly**==5.23.0
